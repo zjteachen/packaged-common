@@ -14,3 +14,7 @@ build/
 dist/
 warg_common.egg-info/
 warg_common/
+
+# Sphinx documentation
+docs/_build/
+docs/modules.rst

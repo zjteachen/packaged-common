@@ -6,7 +6,7 @@ from .base_camera import BaseCameraDevice
 from .camera_factory import CameraOption, create_camera
 from .camera_opencv import CameraOpenCV, ConfigOpenCV
 from .camera_picamera2 import CameraPiCamera2, ConfigPiCamera2
-from .camera_arducamir import CameraArducamIR, ConfigArducamIR
+from .camera_arducamir import CameraArducamIR, ArducamOutput
 
 __all__ = [
     "BaseCameraDevice",
@@ -17,5 +17,5 @@ __all__ = [
     "CameraPiCamera2",
     "ConfigPiCamera2",
     "CameraArducamIR",
-    "ConfigArducamIR",
+    "ArducamOutput",
 ]

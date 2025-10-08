@@ -107,6 +107,218 @@ def build_wheel():
         return False
 
 
+def generate_modules_rst(copied_modules: list[str]):
+    """Generate modules.rst based on which modules were actually copied."""
+    # Module documentation templates
+    module_docs = {
+        "camera": """
+Camera Module
+-------------
+
+.. automodule:: warg_common.camera
+   :members:
+   :undoc-members:
+   :show-inheritance:
+""",
+        "network": """
+Network Module
+--------------
+
+TCP
+~~~
+
+.. automodule:: warg_common.network.tcp
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+UDP
+~~~
+
+.. automodule:: warg_common.network.udp
+   :members:
+   :undoc-members:
+   :show-inheritance:
+""",
+        "logger": """
+Logger Module
+-------------
+
+.. automodule:: warg_common.logger
+   :members:
+   :undoc-members:
+   :show-inheritance:
+""",
+        "data_encoding": """
+Data Encoding Module
+--------------------
+
+.. automodule:: warg_common.data_encoding
+   :members:
+   :undoc-members:
+   :show-inheritance:
+""",
+        "image_encoding": """
+Image Encoding Module
+---------------------
+
+.. automodule:: warg_common.image_encoding
+   :members:
+   :undoc-members:
+   :show-inheritance:
+""",
+        "qr": """
+QR Module
+---------
+
+.. automodule:: warg_common.qr
+   :members:
+   :undoc-members:
+   :show-inheritance:
+""",
+        "kml": """
+KML Module
+----------
+
+.. automodule:: warg_common.kml
+   :members:
+   :undoc-members:
+   :show-inheritance:
+""",
+        "read_yaml": """
+Read YAML Module
+----------------
+
+.. automodule:: warg_common.read_yaml
+   :members:
+   :undoc-members:
+   :show-inheritance:
+""",
+        "hitl": """
+HITL Module
+-----------
+
+.. automodule:: warg_common.hitl
+   :members:
+   :undoc-members:
+   :show-inheritance:
+""",
+        "mavlink": """
+MAVLink Module
+--------------
+
+.. automodule:: warg_common.mavlink
+   :members:
+   :undoc-members:
+   :show-inheritance:
+""",
+    }
+
+    # Build the modules.rst content
+    content = ["API Reference", "=============", "",
+               "This page contains the API reference for all modules in the WARG Common package.", ""]
+
+    # Add documentation for each copied module
+    for module in copied_modules:
+        if module in module_docs:
+            content.append(module_docs[module])
+
+    # Always include data types section (these are standalone files)
+    content.append("""
+Data Types
+----------
+
+Location (Global)
+~~~~~~~~~~~~~~~~~
+
+.. automodule:: warg_common.location_global
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Location (Local)
+~~~~~~~~~~~~~~~~
+
+.. automodule:: warg_common.location_local
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Position (Global)
+~~~~~~~~~~~~~~~~~
+
+.. automodule:: warg_common.position_global
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Position (Global Relative Altitude)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. automodule:: warg_common.position_global_relative_altitude
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Position (Local)
+~~~~~~~~~~~~~~~~
+
+.. automodule:: warg_common.position_local
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Orientation
+~~~~~~~~~~~
+
+.. automodule:: warg_common.orientation
+   :members:
+   :undoc-members:
+   :show-inheritance:
+""")
+
+    # Write the generated content
+    modules_rst_path = Path("docs/modules.rst")
+    modules_rst_path.write_text("\n".join(content))
+    print(f"Generated modules.rst with {len(copied_modules)} module(s)")
+
+
+def build_docs(copied_modules: list[str]):
+    """Build Sphinx documentation and copy to dist/."""
+    print("\nBuilding documentation...")
+
+    # Generate modules.rst based on what was copied
+    generate_modules_rst(copied_modules)
+
+    # Clean previous docs build
+    docs_build_dir = Path("docs/_build")
+    if docs_build_dir.exists():
+        shutil.rmtree(docs_build_dir)
+
+    # Build HTML documentation
+    result = subprocess.run(
+        [sys.executable, "-m", "sphinx", "-b", "html", "docs", "docs/_build/html"],
+        capture_output=True,
+        text=True,
+    )
+
+    if result.returncode != 0:
+        print("✗ Documentation build failed!")
+        print(result.stderr)
+        return False
+
+    # Copy documentation to dist/
+    dist_docs_dir = Path("dist/docs")
+    if dist_docs_dir.exists():
+        shutil.rmtree(dist_docs_dir)
+
+    shutil.copytree(Path("docs/_build/html"), dist_docs_dir)
+
+    print("✓ Documentation built successfully!")
+    print(f"  - HTML documentation: dist/docs/index.html")
+    return True
+
+
 def main():
     parser = argparse.ArgumentParser(description="Build warg_common package with selected modules")
     parser.add_argument(
@@ -114,6 +326,9 @@ def main():
     )
     parser.add_argument(
         "--no-clean", action="store_true", help="Don't clean build directories before building"
+    )
+    parser.add_argument(
+        "--docs", action="store_true", help="Build Sphinx documentation"
     )
 
     args = parser.parse_args()
@@ -138,11 +353,18 @@ def main():
     print(f"\nSuccessfully prepared {len(copied_modules)} module(s)")
 
     # Build the wheel
-    success = build_wheel()
+    wheel_success = build_wheel()
+
+    # Build documentation if requested
+    docs_success = True
+    if args.docs:
+        docs_success = build_docs(copied_modules)
 
     print("\n" + "=" * 60)
-    if success:
+    if wheel_success and docs_success:
         print("Build completed successfully!")
+        if args.docs:
+            print("\nTo view the documentation, open: dist/docs/index.html")
     else:
         print("Build failed!")
         sys.exit(1)
