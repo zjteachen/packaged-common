@@ -4,6 +4,8 @@
 Class with name also available.
 """
 
+from typing import Tuple, Literal, Optional
+
 
 class PositionGlobal:
     """
@@ -15,13 +17,23 @@ class PositionGlobal:
     @classmethod
     def create(
         cls, latitude: float, longitude: float, altitude: float
-    ) -> "tuple[True, PositionGlobal] | tuple[False, None]":
+    ) -> Tuple[Literal[True], "PositionGlobal"]:
         """
-        latitude: Decimal degrees.
-        longitude: Decimal degrees.
-        altitude: Metres above mean sea level (MSL). Can be negative.
+        Create a PositionGlobal instance.
 
-        Return: Success, object.
+        Parameters
+        ----------
+        latitude : float
+            Decimal degrees.
+        longitude : float
+            Decimal degrees.
+        altitude : float
+            Metres above mean sea level (MSL). Can be negative.
+
+        Returns
+        -------
+        Tuple[Literal[True], PositionGlobal]
+            Success status and the created PositionGlobal object.
         """
         return True, PositionGlobal(cls.__create_key, latitude, longitude, altitude)
 
@@ -30,6 +42,17 @@ class PositionGlobal:
     ) -> None:
         """
         Private constructor, use create() method.
+
+        Parameters
+        ----------
+        class_private_create_key : object
+            Private key to prevent direct instantiation.
+        latitude : float
+            Decimal degrees.
+        longitude : float
+            Decimal degrees.
+        altitude : float
+            Metres above mean sea level (MSL). Can be negative.
         """
         assert class_private_create_key is PositionGlobal.__create_key, "Use create() method."
 
@@ -39,13 +62,23 @@ class PositionGlobal:
 
     def __str__(self) -> str:
         """
-        To string.
+        Convert to string representation.
+
+        Returns
+        -------
+        str
+            String representation of the PositionGlobal object.
         """
         return f"{self.__class__}: latitude: {self.latitude}, longitude: {self.longitude}, altitude: {self.altitude}"
 
     def __repr__(self) -> str:
         """
-        For collections (e.g. list).
+        Representation for collections (e.g. list).
+
+        Returns
+        -------
+        str
+            String representation of the PositionGlobal object.
         """
         return str(self)
 
@@ -66,14 +99,25 @@ class NamedPositionGlobal(PositionGlobal):
         latitude: float,
         longitude: float,
         altitude: float,
-    ) -> "tuple[True, NamedPositionGlobal] | tuple[False, None]":
+    ) -> Tuple[Literal[True], "NamedPositionGlobal"]:
         """
-        name: Can be empty.
-        latitude: Decimal degrees.
-        longitude: Decimal degrees.
-        altitude: Metres above mean sea level (MSL). Can be negative.
+        Create a NamedPositionGlobal instance.
 
-        Return: Success, object.
+        Parameters
+        ----------
+        name : str
+            Name for the position. Can be empty.
+        latitude : float
+            Decimal degrees.
+        longitude : float
+            Decimal degrees.
+        altitude : float
+            Metres above mean sea level (MSL). Can be negative.
+
+        Returns
+        -------
+        Tuple[Literal[True], NamedPositionGlobal]
+            Success status and the created NamedPositionGlobal object.
         """
         return True, NamedPositionGlobal(cls.__create_key, name, latitude, longitude, altitude)
 
@@ -87,6 +131,19 @@ class NamedPositionGlobal(PositionGlobal):
     ) -> None:
         """
         Private constructor, use create() method.
+
+        Parameters
+        ----------
+        class_private_create_key : object
+            Private key to prevent direct instantiation.
+        name : str
+            Name for the position.
+        latitude : float
+            Decimal degrees.
+        longitude : float
+            Decimal degrees.
+        altitude : float
+            Metres above mean sea level (MSL). Can be negative.
         """
         assert class_private_create_key is NamedPositionGlobal.__create_key, "Use create() method."
 
@@ -96,6 +153,11 @@ class NamedPositionGlobal(PositionGlobal):
 
     def __str__(self) -> str:
         """
-        To string.
+        Convert to string representation.
+
+        Returns
+        -------
+        str
+            String representation of the NamedPositionGlobal object.
         """
         return f"{self.__class__}: name: {self.name}, latitude: {self.latitude}, longitude: {self.longitude}, altitude: {self.altitude}"

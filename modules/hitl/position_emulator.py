@@ -3,6 +3,7 @@ Emulates position and attitude to Pixhawk.
 """
 
 import time
+from typing import Tuple
 from ..mavlink import dronekit
 
 
@@ -16,12 +17,19 @@ class PositionEmulator:
     @classmethod
     def create(
         cls, drone: dronekit.Vehicle
-    ) -> "tuple[True, PositionEmulator] | tuple[False, None]":
+    ) -> Tuple[bool, "PositionEmulator"]:
         """
-        Setup position emulator.
+        Set up position emulator.
 
-        Returns:
-            Success, PositionEmulator instance.
+        Parameters
+        ----------
+        drone : dronekit.Vehicle
+            The dronekit instance to use for sending MAVLink messages.
+
+        Returns
+        -------
+        Tuple[bool, PositionEmulator]
+            A tuple containing success status and PositionEmulator instance.
         """
 
         return True, PositionEmulator(cls.__create_key, drone)
@@ -29,6 +37,13 @@ class PositionEmulator:
     def __init__(self, class_private_create_key: object, drone: dronekit.Vehicle) -> None:
         """
         Private constructor, use create() method.
+
+        Parameters
+        ----------
+        class_private_create_key : object
+            Private key to ensure constructor is only called via create().
+        drone : dronekit.Vehicle
+            The dronekit instance to use for sending MAVLink messages.
         """
         assert class_private_create_key is PositionEmulator.__create_key, "Use create() method"
 
@@ -38,21 +53,29 @@ class PositionEmulator:
 
     def set_target_position(self, latitude: float, longitude: float, altitude: float) -> None:
         """
-        Sets the target position manually (currently a fallback if Ardupilot target doesnt work).
+        Set the target position manually.
 
-        Args:
-            latitude: Latitude in degrees.
-            longitude: Longitude in degrees.
-            altitude: Altitude in meters.
+        This is currently a fallback if Ardupilot target doesn't work.
+
+        Parameters
+        ----------
+        latitude : float
+            Latitude in degrees.
+        longitude : float
+            Longitude in degrees.
+        altitude : float
+            Altitude in meters.
         """
         self.target_position = (latitude, longitude, altitude)
 
-    def get_target_position(self) -> tuple[float, float, float]:
+    def get_target_position(self) -> Tuple[float, float, float]:
         """
-        Gets the target position from the Ardupilot target.
+        Get the target position from the Ardupilot target.
 
-        Returns:
-            Target position as (latitude, longitude, altitude).
+        Returns
+        -------
+        Tuple[float, float, float]
+            Target position as (latitude, longitude, altitude) in degrees and meters.
         """
         # pylint: disable=protected-access
         position_target = None
@@ -78,7 +101,10 @@ class PositionEmulator:
 
     def periodic(self) -> None:
         """
-        Periodic function.
+        Execute periodic position emulation tasks.
+
+        Updates the target position from Ardupilot and injects the current
+        position into the flight controller.
         """
 
         self.target_position = self.get_target_position()
@@ -94,11 +120,16 @@ class PositionEmulator:
         altitude: float = 373.0,
     ) -> None:
         """
-        Simulates gps coordinates by injecting the desired position of the drone.
-        Args:
-            latitude: Latitude in degrees.
-            longitude: Longitude in degrees.
-            altitude: Altitude in meters.
+        Simulate GPS coordinates by injecting the desired position of the drone.
+
+        Parameters
+        ----------
+        latitude : float, optional
+            Latitude in degrees, by default 43.43405014107003.
+        longitude : float, optional
+            Longitude in degrees, by default -80.57898027451816.
+        altitude : float, optional
+            Altitude in meters, by default 373.0.
         """
         values = [
             int(time.time() * 1e6),  # time_usec

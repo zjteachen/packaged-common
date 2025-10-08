@@ -3,6 +3,7 @@ Orientation of object in 3D space.
 """
 
 import math
+from typing import Tuple, Literal, Optional
 
 
 class Orientation:
@@ -21,13 +22,24 @@ class Orientation:
         yaw: float,
         pitch: float,
         roll: float,
-    ) -> "tuple[bool, Orientation] | tuple[False, None]":
+    ) -> Tuple[Literal[True], "Orientation"] | Tuple[Literal[False], None]:
         """
-        yaw: Radians of [-pi, pi].
-        pitch: Radians of [-pi, pi].
-        roll: Radians of [-pi, pi].
+        Create an Orientation instance.
 
-        Return: Success, object.
+        Parameters
+        ----------
+        yaw : float
+            Radians of [-pi, pi].
+        pitch : float
+            Radians of [-pi, pi].
+        roll : float
+            Radians of [-pi, pi].
+
+        Returns
+        -------
+        Tuple[Literal[True], Orientation] | Tuple[Literal[False], None]
+            Success status and the created Orientation object if successful,
+            or False and None if parameters are out of range.
         """
         if yaw < -math.pi or yaw > math.pi:
             return False, None
@@ -45,6 +57,17 @@ class Orientation:
     ) -> None:
         """
         Private constructor, use create() method.
+
+        Parameters
+        ----------
+        class_private_create_key : object
+            Private key to prevent direct instantiation.
+        yaw : float
+            Radians of [-pi, pi].
+        pitch : float
+            Radians of [-pi, pi].
+        roll : float
+            Radians of [-pi, pi].
         """
         assert class_private_create_key is Orientation.__create_key, "Use create() method."
 
@@ -54,12 +77,22 @@ class Orientation:
 
     def __str__(self) -> str:
         """
-        To string.
+        Convert to string representation.
+
+        Returns
+        -------
+        str
+            String representation of the Orientation object.
         """
         return f"{self.__class__} YPR radians: {self.yaw}, {self.pitch}, {self.roll}"
 
     def __repr__(self) -> str:
         """
-        For collections (e.g. list).
+        Representation for collections (e.g. list).
+
+        Returns
+        -------
+        str
+            String representation of the Orientation object.
         """
         return str(self)

@@ -3,6 +3,7 @@ Wrapper for a TCP socket.
 """
 
 import socket
+from typing import Optional, Tuple
 
 
 class TcpSocket:
@@ -12,9 +13,11 @@ class TcpSocket:
 
     def __init__(self, socket_instance: socket.socket) -> None:
         """
+        Initialize the TcpSocket wrapper.
+
         Parameters
         ----------
-        instance: socket.socket
+        socket_instance : socket.socket
             For initializing Socket with an existing socket object.
         """
 
@@ -26,11 +29,13 @@ class TcpSocket:
 
         Parameters
         ----------
-        data: bytes
+        data : bytes
+            The data to send over the socket.
 
         Returns
         -------
-        bool: If the data was sent successfully.
+        bool
+            True if the data was sent successfully, False otherwise.
         """
 
         try:
@@ -41,18 +46,18 @@ class TcpSocket:
 
         return True
 
-    def recv(self, buf_size: int) -> "tuple[bool, bytes | None]":
+    def recv(self, buf_size: int) -> Tuple[bool, Optional[bytes]]:
         """
         Reads buf_size bytes from the socket.
 
         Parameters
         ----------
-        buf_size: int
+        buf_size : int
             The number of bytes to receive.
 
         Returns
         -------
-        tuple[bool, bytes | None]
+        Tuple[bool, Optional[bytes]]
             The first parameter represents if the read is successful.
             - If it is not successful, the second parameter will be None.
             - If it is successful, the second parameter will be the data that is read.
@@ -80,7 +85,8 @@ class TcpSocket:
 
         Returns
         -------
-        bool: If the socket was closed successfully.
+        bool
+            True if the socket was closed successfully, False otherwise.
         """
 
         try:
@@ -91,13 +97,13 @@ class TcpSocket:
 
         return True
 
-    def address(self) -> "tuple[str, int]":
+    def address(self) -> Tuple[str, int]:
         """
         Retrieves the address that the socket is listening on.
 
         Returns
         -------
-        tuple[str, int]
+        Tuple[str, int]
             The address in the format (ip address, port).
         """
 
@@ -105,7 +111,12 @@ class TcpSocket:
 
     def get_socket(self) -> socket.socket:
         """
-        Getter for the underlying socket objet.
+        Getter for the underlying socket object.
+
+        Returns
+        -------
+        socket.socket
+            The underlying socket object.
         """
 
         return self.__socket

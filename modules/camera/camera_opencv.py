@@ -1,9 +1,10 @@
-"""
-OpenCV implementation of the camera wrapper.
-"""
+"""OpenCV implementation of the camera wrapper."""
+
+from typing import Tuple, Literal
 
 import cv2
 import numpy as np
+from numpy.typing import NDArray
 
 from . import base_camera
 
@@ -11,18 +12,30 @@ from . import base_camera
 class ConfigOpenCV:
     """
     Configuration for the OpenCV camera.
+
+    Attributes
+    ----------
+    device_index : int
+        Index of the camera device.
     """
 
     def __init__(self, device_index: int) -> None:
         """
-        index: Index of the device.
+        Initialize OpenCV camera configuration.
+
+        Parameters
+        ----------
+        device_index : int
+            Index of the camera device.
         """
         self.device_index = device_index
 
 
 class CameraOpenCV(base_camera.BaseCameraDevice):
     """
-    Class for the OpenCV implementation of the camera.
+    OpenCV implementation of the camera device.
+
+    This class provides camera functionality using OpenCV's VideoCapture API.
     """
 
     __create_key = object()
@@ -30,15 +43,23 @@ class CameraOpenCV(base_camera.BaseCameraDevice):
     @classmethod
     def create(
         cls, width: int, height: int, config: ConfigOpenCV
-    ) -> "tuple[True, CameraOpenCV] | tuple[False, None]":
+    ) -> Tuple[Literal[True], "CameraOpenCV"] | Tuple[Literal[False], None]:
         """
-        OpenCV Camera.
+        Create an OpenCV camera instance.
 
-        width: Width of the camera.
-        height: Height of the camera.
-        config: Configuration of for OpenCV camera.
+        Parameters
+        ----------
+        width : int
+            Width of the camera in pixels.
+        height : int
+            Height of the camera in pixels.
+        config : ConfigOpenCV
+            Configuration for OpenCV camera.
 
-        Return: Success, camera object.
+        Returns
+        -------
+        tuple[Literal[True], CameraOpenCV] | tuple[Literal[False], None]
+            Success status and camera object if successful, (False, None) otherwise.
         """
         if width <= 0:
             return False, None
@@ -63,6 +84,13 @@ class CameraOpenCV(base_camera.BaseCameraDevice):
     def __init__(self, class_private_create_key: object, camera: cv2.VideoCapture) -> None:
         """
         Private constructor, use create() method.
+
+        Parameters
+        ----------
+        class_private_create_key : object
+            Private key to prevent direct instantiation.
+        camera : cv2.VideoCapture
+            OpenCV VideoCapture object.
         """
         assert class_private_create_key is CameraOpenCV.__create_key, "Use create() method."
 
@@ -74,11 +102,15 @@ class CameraOpenCV(base_camera.BaseCameraDevice):
         """
         self.__camera.release()
 
-    def run(self) -> tuple[True, np.ndarray] | tuple[False, None]:
+    def run(self) -> Tuple[Literal[True], NDArray[np.uint8]] | Tuple[Literal[False], None]:
         """
-        Takes a picture with OpenCV camera.
+        Take a picture with OpenCV camera.
 
-        Return: Success, image with shape (height, width, channels in BGR).
+        Returns
+        -------
+        tuple[Literal[True], NDArray[np.uint8]] | tuple[Literal[False], None]
+            Success status and image array with shape (height, width, channels in BGR)
+            if successful, (False, None) otherwise.
         """
         result, image_data = self.__camera.read()
         if not result:

@@ -9,13 +9,13 @@ import os
 import pathlib
 import sys
 import time
+from typing import Optional, Tuple
 
-# Used in type annotation of logger parameters
-# pylint: disable-next=unused-import
 import types
 
 import cv2
 import numpy as np
+from numpy.typing import NDArray
 
 from ..read_yaml import read_yaml
 
@@ -31,9 +31,21 @@ class Logger:
     __create_key = object()
 
     @classmethod
-    def create(cls, name: str, enable_log_to_file: bool) -> "tuple[bool, Logger | None]":
+    def create(cls, name: str, enable_log_to_file: bool) -> Tuple[bool, Optional["Logger"]]:
         """
         Create and configure a logger.
+
+        Parameters
+        ----------
+        name : str
+            Name of the logger instance.
+        enable_log_to_file : bool
+            Whether to enable logging to file.
+
+        Returns
+        -------
+        Tuple[bool, Optional[Logger]]
+            Success status and the created Logger instance (None if failed).
         """
         # Configuration settings
         result, config = read_yaml.open_config(CONFIG_FILE_PATH)
@@ -109,10 +121,19 @@ class Logger:
         self,
         class_create_private_key: object,
         logger: logging.Logger,
-        maybe_log_directory: pathlib.Path | None,
+        maybe_log_directory: Optional[pathlib.Path],
     ) -> None:
         """
         Private constructor, use create() method.
+
+        Parameters
+        ----------
+        class_create_private_key : object
+            Private key to prevent direct instantiation.
+        logger : logging.Logger
+            The underlying Python logger instance.
+        maybe_log_directory : Optional[pathlib.Path]
+            Directory path for log files, or None if file logging is disabled.
         """
         assert class_create_private_key is Logger.__create_key, "Use create() method."
 
@@ -120,9 +141,21 @@ class Logger:
         self.__maybe_log_directory = maybe_log_directory
 
     @staticmethod
-    def message_and_metadata(message: str, frame: "types.FrameType | None") -> str:
+    def message_and_metadata(message: str, frame: Optional[types.FrameType]) -> str:
         """
         Extracts metadata from frame and appends it to the message.
+
+        Parameters
+        ----------
+        message : str
+            The log message.
+        frame : Optional[types.FrameType]
+            The stack frame containing metadata, or None.
+
+        Returns
+        -------
+        str
+            The message with metadata appended.
         """
         if frame is None:
             return message
@@ -139,6 +172,13 @@ class Logger:
     def debug(self, message: str, log_with_frame_info: bool = True) -> None:
         """
         Logs a debug level message.
+
+        Parameters
+        ----------
+        message : str
+            The debug message to log.
+        log_with_frame_info : bool, optional
+            Whether to include frame information (filename, function, line number), by default True.
         """
         if log_with_frame_info:
             logger_frame = inspect.currentframe()
@@ -149,6 +189,13 @@ class Logger:
     def info(self, message: str, log_with_frame_info: bool = True) -> None:
         """
         Logs an info level message.
+
+        Parameters
+        ----------
+        message : str
+            The info message to log.
+        log_with_frame_info : bool, optional
+            Whether to include frame information (filename, function, line number), by default True.
         """
         if log_with_frame_info:
             logger_frame = inspect.currentframe()
@@ -159,6 +206,13 @@ class Logger:
     def warning(self, message: str, log_with_frame_info: bool = True) -> None:
         """
         Logs a warning level message.
+
+        Parameters
+        ----------
+        message : str
+            The warning message to log.
+        log_with_frame_info : bool, optional
+            Whether to include frame information (filename, function, line number), by default True.
         """
         if log_with_frame_info:
             logger_frame = inspect.currentframe()
@@ -169,6 +223,13 @@ class Logger:
     def error(self, message: str, log_with_frame_info: bool = True) -> None:
         """
         Logs an error level message.
+
+        Parameters
+        ----------
+        message : str
+            The error message to log.
+        log_with_frame_info : bool, optional
+            Whether to include frame information (filename, function, line number), by default True.
         """
         if log_with_frame_info:
             logger_frame = inspect.currentframe()
@@ -179,6 +240,13 @@ class Logger:
     def critical(self, message: str, log_with_frame_info: bool = True) -> None:
         """
         Logs a critical level message.
+
+        Parameters
+        ----------
+        message : str
+            The critical message to log.
+        log_with_frame_info : bool, optional
+            Whether to include frame information (filename, function, line number), by default True.
         """
         if log_with_frame_info:
             logger_frame = inspect.currentframe()
@@ -188,17 +256,21 @@ class Logger:
 
     def save_image(
         self,
-        image: np.ndarray,
+        image: NDArray[np.uint8],
         filename: str = "",
         log_with_frame_info: bool = True,
     ) -> None:
         """
         Logs an image.
 
-        Args:
-            image: The image to log.
-            filename: The filename to save the image as.
-            log_with_frame_info: Whether to log the frame info.
+        Parameters
+        ----------
+        image : NDArray[np.uint8]
+            The image to log as a numpy array.
+        filename : str, optional
+            The filename to save the image as (without extension), by default "".
+        log_with_frame_info : bool, optional
+            Whether to log the frame info, by default True.
         """
         if self.__maybe_log_directory is None:
             self.logger.warning("Image not saved: Logger not set up with file logging")

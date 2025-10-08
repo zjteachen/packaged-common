@@ -1,10 +1,11 @@
 """
 Encoding and Decoding Global Positions
-Save first byte as char to represent which worker sent the message 
+Save first byte as char to represent which worker sent the message
 """
 
 import base64
 import struct
+from typing import Optional, Tuple
 
 from .. import position_global
 from . import worker_enum
@@ -15,17 +16,23 @@ DATA_FORMAT = "=Bddd"  # 1 unsigned char + 3 doubles = 25 bytes
 
 def encode_position_global(
     worker_id: worker_enum.WorkerEnum, global_position: position_global.PositionGlobal
-) -> "tuple[True, bytes] | tuple[False, None]":
+) -> Tuple[bool, Optional[bytes]]:
     """
-    Encode PositionGlobal object into Bytes. Worker_ID to be encoded as the first byte of the message
+    Encode PositionGlobal object into Bytes. Worker_ID to be encoded as the first byte of the message.
 
-    Parameters:
-       worker_id: ID of the worker defined by its constant in WorkerEnum
-       global_position: PositionGlobal object
+    Parameters
+    ----------
+    worker_id : worker_enum.WorkerEnum
+        ID of the worker defined by its constant in WorkerEnum.
+    global_position : position_global.PositionGlobal
+        PositionGlobal object to encode.
 
-    Returns:
-        packed_coordinates (bytes): Encoded latitude, longitude, altitude of PositionGlobal object as bytes.
-        First byte dependant on which worker is calling the funciton, value depends on its corresponding enum value.
+    Returns
+    -------
+    Tuple[bool, Optional[bytes]]
+        Success status and encoded bytes containing latitude, longitude, altitude.
+        First byte depends on which worker is calling the function (its enum value).
+        Returns (False, None) on encoding failure.
     """
     try:
         if not isinstance(
@@ -52,17 +59,20 @@ def encode_position_global(
 
 def decode_bytes_to_position_global(
     encoded_str: bytes,
-) -> (
-    "tuple[True, worker_enum.WorkerEnum, position_global.PositionGlobal] | tuple[False, None, None]"
-):
+) -> Tuple[bool, Optional[worker_enum.WorkerEnum], Optional[position_global.PositionGlobal]]:
     """
     Decode bytes into a PositionGlobal object.
 
-    Parameters:
-        encoded_message (bytes): Encoded bytearray containing latitude, longitude, altitude
+    Parameters
+    ----------
+    encoded_str : bytes
+        Encoded bytearray containing worker ID, latitude, longitude, altitude.
 
-    Returns:
-        Tuple: success, WorkerEnum class corresponding to ID, PositionGlobal: Decoded PositionGlobal object.
+    Returns
+    -------
+    Tuple[bool, Optional[worker_enum.WorkerEnum], Optional[position_global.PositionGlobal]]
+        Success status, WorkerEnum member corresponding to ID, and decoded PositionGlobal object.
+        Returns (False, None, None) on decoding failure.
     """
     # Unpack the byte sequence
     try:

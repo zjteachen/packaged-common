@@ -1,8 +1,7 @@
-"""
-Factory pattern for constructing camera device class at runtime.
-"""
+"""Factory pattern for constructing camera device class at runtime."""
 
 import enum
+from typing import Union, Tuple, Literal
 
 from . import base_camera
 from . import camera_opencv
@@ -12,7 +11,16 @@ from . import camera_arducamir
 
 class CameraOption(enum.Enum):
     """
-    enum for type of camera object to create.
+    Enumeration for type of camera object to create.
+
+    Attributes
+    ----------
+    OPENCV : int
+        OpenCV camera implementation.
+    PICAM2 : int
+        Picamera2 camera implementation (Raspberry Pi).
+    ARDUCAMIR : int
+        ArducamIR camera implementation.
     """
 
     OPENCV = 0
@@ -24,12 +32,29 @@ def create_camera(
     camera_option: CameraOption,
     width: int,
     height: int,
-    config: camera_opencv.ConfigOpenCV | camera_picamera2.ConfigPiCamera2 | None,
-) -> tuple[True, base_camera.BaseCameraDevice] | tuple[False, None]:
+    config: Union[camera_opencv.ConfigOpenCV, camera_picamera2.ConfigPiCamera2, None],
+) -> Tuple[Literal[True], base_camera.BaseCameraDevice] | Tuple[Literal[False], None]:
     """
-    Create a camera object based off of given parameters.
+    Create a camera object based on given parameters.
 
-    Return: Success, camera device object.
+    This factory function creates the appropriate camera device implementation
+    based on the specified camera option.
+
+    Parameters
+    ----------
+    camera_option : CameraOption
+        Type of camera to create (OPENCV, PICAM2, or ARDUCAMIR).
+    width : int
+        Width of the camera in pixels.
+    height : int
+        Height of the camera in pixels.
+    config : Union[ConfigOpenCV, ConfigPiCamera2, None]
+        Configuration object for the selected camera type.
+
+    Returns
+    -------
+    tuple[Literal[True], BaseCameraDevice] | tuple[Literal[False], None]
+        Success status and camera device object if successful, (False, None) otherwise.
     """
     match camera_option:
         case CameraOption.OPENCV:

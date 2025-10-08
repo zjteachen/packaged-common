@@ -2,6 +2,8 @@
 Conversion between local and global space.
 """
 
+from typing import Optional, Tuple
+
 import pymap3d as pm
 
 from . import drone_odometry_global
@@ -15,14 +17,22 @@ from .. import position_local
 def position_global_from_position_local(
     home_position: position_global.PositionGlobal,
     local_position: position_local.PositionLocal,
-) -> tuple[bool, position_global.PositionGlobal] | tuple[False, None]:
+) -> Tuple[bool, Optional[position_global.PositionGlobal]]:
     """
     Local coordinates to global coordinates.
 
-    home_position: Global.
-    local_position: Local.
+    Parameters
+    ----------
+    home_position : position_global.PositionGlobal
+        The home position in global coordinates.
+    local_position : position_local.PositionLocal
+        The local position to convert.
 
-    Return: Success, global.
+    Returns
+    -------
+    Tuple[bool, Optional[position_global.PositionGlobal]]
+        A tuple containing success status and global position.
+        Returns (False, None) if conversion fails.
     """
     latitude, longitude, altitude = pm.ned2geodetic(
         local_position.north,
@@ -47,14 +57,22 @@ def position_global_from_position_local(
 def position_global_from_location_local(
     home_position: position_global.PositionGlobal,
     local_location: location_local.LocationLocal,
-) -> tuple[bool, position_global.PositionGlobal] | tuple[False, None]:
+) -> Tuple[bool, Optional[position_global.PositionGlobal]]:
     """
     Local coordinates to global coordinates.
 
-    home_position: Global.
-    local_position: Local.
+    Parameters
+    ----------
+    home_position : position_global.PositionGlobal
+        The home position in global coordinates.
+    local_location : location_local.LocationLocal
+        The local location to convert.
 
-    Return: Global.
+    Returns
+    -------
+    Tuple[bool, Optional[position_global.PositionGlobal]]
+        A tuple containing success status and global position.
+        Returns (False, None) if conversion fails.
     """
     result, local_position = position_local.PositionLocal.create(
         local_location.north, local_location.east, 0.0
@@ -68,14 +86,22 @@ def position_global_from_location_local(
 def position_local_from_position_global(
     home_position: position_global.PositionGlobal,
     global_position: position_global.PositionGlobal,
-) -> tuple[True, position_local.PositionLocal] | tuple[False, None]:
+) -> Tuple[bool, Optional[position_local.PositionLocal]]:
     """
     Global coordinates to local coordinates.
 
-    home_position: Global.
-    global_position: Global.
+    Parameters
+    ----------
+    home_position : position_global.PositionGlobal
+        The home position in global coordinates.
+    global_position : position_global.PositionGlobal
+        The global position to convert.
 
-    Return: Local.
+    Returns
+    -------
+    Tuple[bool, Optional[position_local.PositionLocal]]
+        A tuple containing success status and local position.
+        Returns (False, None) if conversion fails.
     """
     north, east, down = pm.geodetic2ned(
         global_position.latitude,
@@ -100,14 +126,22 @@ def position_local_from_position_global(
 def position_local_from_location_global(
     home_position: position_global.PositionGlobal,
     global_location: location_global.LocationGlobal,
-) -> tuple[True, position_local.PositionLocal] | tuple[False, None]:
+) -> Tuple[bool, Optional[position_local.PositionLocal]]:
     """
     Global coordinates to local coordinates.
 
-    home_position: Global.
-    global_location: Global.
+    Parameters
+    ----------
+    home_position : position_global.PositionGlobal
+        The home position in global coordinates.
+    global_location : location_global.LocationGlobal
+        The global location to convert.
 
-    Return: Local.
+    Returns
+    -------
+    Tuple[bool, Optional[position_local.PositionLocal]]
+        A tuple containing success status and local position.
+        Returns (False, None) if conversion fails.
     """
     result, global_position = position_global.PositionGlobal.create(
         global_location.latitude, global_location.longitude, home_position.altitude
@@ -121,14 +155,22 @@ def position_local_from_location_global(
 def drone_odometry_local_from_global(
     home_position: position_global.PositionGlobal,
     odometry_global: drone_odometry_global.DroneOdometryGlobal,
-) -> tuple[bool, drone_odometry_local.DroneOdometryLocal] | tuple[False, None]:
+) -> Tuple[bool, Optional[drone_odometry_local.DroneOdometryLocal]]:
     """
     Converts global odometry to local.
 
-    home_position: Global.
-    odometry_global: Global.
+    Parameters
+    ----------
+    home_position : position_global.PositionGlobal
+        The home position in global coordinates.
+    odometry_global : drone_odometry_global.DroneOdometryGlobal
+        The global odometry data to convert.
 
-    Return: Local.
+    Returns
+    -------
+    Tuple[bool, Optional[drone_odometry_local.DroneOdometryLocal]]
+        A tuple containing success status and local odometry data.
+        Returns (False, None) if conversion fails.
     """
     result, drone_position_local = position_local_from_position_global(
         home_position,

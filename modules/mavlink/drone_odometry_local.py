@@ -2,6 +2,8 @@
 Drone odometry in local space (origin at home position global).
 """
 
+from typing import Optional, Tuple
+
 from .. import orientation
 from .. import position_local
 
@@ -18,9 +20,22 @@ class DroneOdometryLocal:
         cls,
         drone_position: position_local.PositionLocal,
         drone_orientation: orientation.Orientation,
-    ) -> "tuple[True, DroneOdometryLocal] | tuple[False, None]":
+    ) -> Tuple[bool, Optional["DroneOdometryLocal"]]:
         """
         Position and orientation in one class.
+
+        Parameters
+        ----------
+        drone_position : position_local.PositionLocal
+            The drone's local position.
+        drone_orientation : orientation.Orientation
+            The drone's orientation.
+
+        Returns
+        -------
+        Tuple[bool, Optional[DroneOdometryLocal]]
+            A tuple containing success status and DroneOdometryLocal instance.
+            Returns (False, None) if any parameter is None.
         """
         if drone_position is None:
             return False, None

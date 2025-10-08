@@ -4,6 +4,7 @@ Wrapper for the flight controller.
 
 import time
 import enum
+from typing import Optional, Tuple, List
 
 from pymavlink import mavutil
 from modules.hitl import hitl_base
@@ -36,9 +37,20 @@ class MAVLinkMessager:
     def create(
         cls,
         vehicle: mavutil.mavtcp,
-    ) -> "tuple[bool, MAVLinkMessager] | tuple[False, None]":
+    ) -> Tuple[bool, Optional["MAVLinkMessager"]]:
         """
-        Abstraction from MAVLink Message
+        Abstraction from MAVLink Message.
+
+        Parameters
+        ----------
+        vehicle : mavutil.mavtcp
+            The MAVLink vehicle connection object.
+
+        Returns
+        -------
+        Tuple[bool, Optional[MAVLinkMessager]]
+            A tuple containing success status and the MAVLinkMessager instance.
+            Returns (False, None) if vehicle is None, otherwise (True, MAVLinkMessager).
         """
         if vehicle is None:
             return False, None
@@ -64,7 +76,19 @@ class MAVLinkMessager:
         severity: int = mavutil.mavlink.MAV_SEVERITY_INFO,
     ) -> bool:
         """
-        Sending a STATUSTEXT MavLink Message
+        Sending a STATUSTEXT MavLink Message.
+
+        Parameters
+        ----------
+        data : dict
+            Dictionary containing the message data with a 'text' key.
+        severity : int, optional
+            Message severity level (default is MAV_SEVERITY_INFO).
+
+        Returns
+        -------
+        bool
+            True if message was sent successfully, False otherwise.
         """
         if data["text"] is None:
             print("Text is required to send STATUSTEXT message")
@@ -84,7 +108,17 @@ class MAVLinkMessager:
         data: dict,
     ) -> bool:
         """
-        Sending a DEBUG_VECT MavLink Message
+        Sending a DEBUG_VECT MavLink Message.
+
+        Parameters
+        ----------
+        data : dict
+            Dictionary containing 'name', 'x', 'y', and 'z' keys.
+
+        Returns
+        -------
+        bool
+            True if message was sent successfully, False otherwise.
         """
         if data["name"] is None:
             print("Name is required to send DEBUG_VECT message")
@@ -120,7 +154,17 @@ class MAVLinkMessager:
         data: dict,
     ) -> bool:
         """
-        Sending a NAMED_VALUE_FLOAT MavLink Message
+        Sending a NAMED_VALUE_FLOAT MavLink Message.
+
+        Parameters
+        ----------
+        data : dict
+            Dictionary containing 'name' and 'value' keys.
+
+        Returns
+        -------
+        bool
+            True if message was sent successfully, False otherwise.
         """
         if data["name"] is None:
             print("Name is required to send NAMED_VALUE_FLOAT message")
@@ -150,7 +194,17 @@ class MAVLinkMessager:
         data: dict,
     ) -> bool:
         """
-        Sending a NAMED_VALUE_INT MavLink Message
+        Sending a NAMED_VALUE_INT MavLink Message.
+
+        Parameters
+        ----------
+        data : dict
+            Dictionary containing 'name' and 'value' keys.
+
+        Returns
+        -------
+        bool
+            True if message was sent successfully, False otherwise.
         """
         if data["name"] is None:
             print("Name is required to send NAMED_VALUE_INT message")
@@ -177,7 +231,19 @@ class MAVLinkMessager:
 
     def send_message(self, data: dict, message_type: MAVLinkMessage) -> bool:
         """
-        Sending a General MavLink Message
+        Sending a General MavLink Message.
+
+        Parameters
+        ----------
+        data : dict
+            Dictionary containing message-specific data.
+        message_type : MAVLinkMessage
+            The type of MAVLink message to send.
+
+        Returns
+        -------
+        bool
+            True if message was sent successfully, False otherwise.
         """
         if message_type == MAVLinkMessage.DEBUG_VECT:
             return self.debug_vect_send(data)
@@ -210,14 +276,31 @@ class FlightController:
         hitl_enabled: bool = False,
         position_module: bool = False,
         camera_module: bool = False,
-        images_path: str | None = None,
-    ) -> "tuple[bool, FlightController | None]":
+        images_path: Optional[str] = None,
+    ) -> Tuple[bool, Optional["FlightController"]]:
         """
-        address: TCP address or serial port of the drone (e.g. "tcp:127.0.0.1:14550").
-        baud: Baud rate for the connection (default is 57600).
-        mode: True to enable HITL mode, False or None to disable it.
-        Establishes connection to drone through provided address
-        and stores the DroneKit object.
+        Establishes connection to drone through provided address and stores the DroneKit object.
+
+        Parameters
+        ----------
+        address : str
+            TCP address or serial port of the drone (e.g. "tcp:127.0.0.1:14550").
+        baud : int, optional
+            Baud rate for the connection (default is 57600).
+        hitl_enabled : bool, optional
+            True to enable HITL mode, False to disable it (default is False).
+        position_module : bool, optional
+            Enable position module for HITL (default is False).
+        camera_module : bool, optional
+            Enable camera module for HITL (default is False).
+        images_path : Optional[str], optional
+            Path to images for camera module (default is None).
+
+        Returns
+        -------
+        Tuple[bool, Optional[FlightController]]
+            A tuple containing success status and FlightController instance.
+            Returns (False, None) on connection failure.
         """
 
         try:
@@ -249,7 +332,7 @@ class FlightController:
         class_private_create_key: object,
         vehicle: dronekit.Vehicle,
         hitl: bool,
-        hitl_instance: hitl_base.HITL | None = None,
+        hitl_instance: Optional[hitl_base.HITL] = None,
     ) -> None:
         """
         Private constructor, use create() method.
@@ -260,9 +343,15 @@ class FlightController:
         self.hitl = hitl
         self.hitl_instance = hitl_instance
 
-    def get_odometry(self) -> "tuple[bool, drone_odometry_global.DroneOdometryGlobal | None]":
+    def get_odometry(self) -> Tuple[bool, Optional[drone_odometry_global.DroneOdometryGlobal]]:
         """
         Returns odometry data from the drone.
+
+        Returns
+        -------
+        Tuple[bool, Optional[DroneOdometryGlobal]]
+            A tuple containing success status and odometry data.
+            Returns (False, None) if odometry data cannot be retrieved.
         """
         attitude_info = self.drone.attitude
         if attitude_info is None:
@@ -321,10 +410,20 @@ class FlightController:
 
     def get_home_position(
         self, timeout: float
-    ) -> "tuple[bool, position_global.PositionGlobal | None]":
+    ) -> Tuple[bool, Optional[position_global.PositionGlobal]]:
         """
         Attempts to get the drone's home position until timeout.
-        timeout: Seconds.
+
+        Parameters
+        ----------
+        timeout : float
+            Maximum time to wait in seconds.
+
+        Returns
+        -------
+        Tuple[bool, Optional[PositionGlobal]]
+            A tuple containing success status and home position.
+            Returns (False, None) if home position cannot be retrieved within timeout.
         """
         start_time = time.time()
         while self.drone.home_location is None and time.time() - start_time < timeout:
@@ -346,17 +445,19 @@ class FlightController:
 
         return True, position
 
-    def upload_commands(self, commands: "list[dronekit.Command]") -> bool:
+    def upload_commands(self, commands: List[dronekit.Command]) -> bool:
         """
         Writes a mission to the drone from a list of commands (will overwrite any previous missions).
 
         Parameters
         ----------
-        commands: List of commands.
+        commands : List[dronekit.Command]
+            List of commands to upload to the drone.
 
         Returns
         -------
-        bool: Whether the upload is successful.
+        bool
+            True if upload is successful, False otherwise.
         """
         if len(commands) == 0:
             return False
@@ -388,12 +489,15 @@ class FlightController:
 
         Parameters
         ----------
-        latitude: Decimal degrees.
-        longitude: Decimal degrees.
+        latitude : float
+            Target latitude in decimal degrees.
+        longitude : float
+            Target longitude in decimal degrees.
 
         Returns
         -------
-        bool: Whether the upload is successful.
+        bool
+            True if upload is successful, False otherwise.
         """
         # TODO: DroneKit-Python's Command uses floating point value, which is not accurate enough for WARG. Investigate using MAVLink's integer command.
         landing_command = dronekit.Command(
@@ -415,13 +519,13 @@ class FlightController:
 
         return self.upload_commands([landing_command])
 
-    def is_drone_destination_final_waypoint(self) -> "tuple[bool, bool | None]":
+    def is_drone_destination_final_waypoint(self) -> Tuple[bool, Optional[bool]]:
         """
         Returns if the drone's destination is the final waypoint in the mission.
 
         Returns
         -------
-        tuple[bool, bool | None]
+        Tuple[bool, Optional[bool]]
             The first boolean in the tuple represents if retrieving the mission
             information is successful.
             - If it is not successful, the second parameter will be None.
@@ -443,6 +547,19 @@ class FlightController:
     def move_to_position(self, position: position_global.PositionGlobal) -> bool:
         """
         Commands the drone to move to a specified position in 3D space.
+
+        Parameters
+        ----------
+        position : position_global.PositionGlobal
+            Target position to move to.
+
+        Returns
+        -------
+        bool
+            True if command is successful, False otherwise.
+
+        Notes
+        -----
         There is no check to verify that the specified altitude is above ground.
         """
         try:
@@ -465,7 +582,17 @@ class FlightController:
     def set_flight_mode(self, mode: str) -> bool:
         """
         Changes the flight mode of the drone.
-        https://ardupilot.org/copter/docs/flight-modes.html
+
+        Parameters
+        ----------
+        mode : str
+            The flight mode to set (e.g., "GUIDED", "AUTO", "LOITER").
+            See https://ardupilot.org/copter/docs/flight-modes.html for valid modes.
+
+        Returns
+        -------
+        bool
+            True if mode change is successful, False otherwise.
         """
         try:
             self.drone.mode = dronekit.VehicleMode(mode)
@@ -474,9 +601,15 @@ class FlightController:
             return False
         return True
 
-    def get_flight_mode(self) -> "tuple[bool, drone_odometry_global.FlightMode | None]":
+    def get_flight_mode(self) -> Tuple[bool, Optional[drone_odometry_global.FlightMode]]:
         """
         Gets the current flight mode of the drone.
+
+        Returns
+        -------
+        Tuple[bool, Optional[FlightMode]]
+            A tuple containing success status and flight mode.
+            Returns (False, None) if flight mode cannot be retrieved.
         """
         flight_mode = self.drone.mode.name
 
@@ -488,15 +621,16 @@ class FlightController:
             return True, drone_odometry_global.FlightMode.MOVING
         return True, drone_odometry_global.FlightMode.MANUAL
 
-    def download_commands(self) -> "tuple[bool, list[dronekit.Command]]":
+    def download_commands(self) -> Tuple[bool, List[dronekit.Command]]:
         """
         Downloads the current list of commands from the drone.
 
         Returns
         -------
-        tuple[bool, list[dronekit.Command]]
-        A tuple where the first element is a boolean indicating success or failure,
-        and the second element is the list of commands currently held by the drone.
+        Tuple[bool, List[dronekit.Command]]
+            A tuple where the first element is a boolean indicating success or failure,
+            and the second element is the list of commands currently held by the drone.
+            Returns (False, []) on failure.
         """
         try:
             command_sequence = self.drone.commands
@@ -511,11 +645,15 @@ class FlightController:
             print("ERROR: Connection with drone reset. Unable to download commands.")
             return False, []
 
-    def get_next_waypoint(self) -> "tuple[bool, position_global.PositionGlobal | None]":
+    def get_next_waypoint(self) -> Tuple[bool, Optional[position_global.PositionGlobal]]:
         """
         Gets the next waypoint.
 
-        Return: Success, waypoint position.
+        Returns
+        -------
+        Tuple[bool, Optional[PositionGlobal]]
+            A tuple containing success status and waypoint position.
+            Returns (False, None) if waypoint cannot be retrieved.
         """
         result, commands = self.download_commands()
         if not result:
@@ -536,6 +674,22 @@ class FlightController:
     ) -> bool:
         """
         Insert a waypoint into the current list of commands at a certain index and reupload the list to the drone.
+
+        Parameters
+        ----------
+        index : int
+            Index position to insert the waypoint.
+        latitude : float
+            Waypoint latitude in decimal degrees.
+        longitude : float
+            Waypoint longitude in decimal degrees.
+        altitude : float
+            Waypoint altitude in meters.
+
+        Returns
+        -------
+        bool
+            True if insertion and upload is successful, False otherwise.
         """
         result, commands = self.download_commands()
         if not result:
@@ -569,6 +723,18 @@ class FlightController:
     ) -> bool:
         """
         Sends a STATUSTEXT message to the vehicle.
+
+        Parameters
+        ----------
+        message : str
+            The text message to send (maximum 50 bytes when encoded as UTF-8).
+        severity : int, optional
+            Message severity level (default is MAV_SEVERITY_INFO).
+
+        Returns
+        -------
+        bool
+            True if message was sent successfully, False otherwise.
         """
         message_bytes = message.encode("utf-8")
         if len(message_bytes) > 50:

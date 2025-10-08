@@ -4,6 +4,7 @@ Wrapper for a UDP socket.
 
 import socket
 import time
+from typing import Optional, Tuple
 
 
 CHUNK_SIZE = 2**15  # 32 kb, may need to be shrunk on pi becasue its buffer may not be as large
@@ -15,12 +16,14 @@ class UdpSocket:
     Wrapper for a UDP socket.
     """
 
-    def __init__(self, socket_instance: socket.socket = None) -> None:
+    def __init__(self, socket_instance: Optional[socket.socket] = None) -> None:
         """
+        Initialize the UdpSocket wrapper.
+
         Parameters
         ----------
-        instance: socket.socket
-            For initializing Socket with an existing socket object.
+        socket_instance : Optional[socket.socket], optional
+            For initializing Socket with an existing socket object, by default None.
         """
 
         self.__socket = socket_instance
@@ -34,19 +37,25 @@ class UdpSocket:
         send_delay: float = SEND_DELAY,
     ) -> bool:
         """
-        Sends data to specified address
+        Sends data to specified address.
 
         Parameters
         ----------
-        data: bytes
-        host: str (default "")
-            Empty string is interpreted as '0.0.0.0' (IPv4) or '::' (IPv6), which is an open address
-        port: int (default 5000)
-            The host, combined with the port, will form the address as a tuple
+        data : bytes
+            The data to send.
+        host : str, optional
+            Empty string is interpreted as '0.0.0.0' (IPv4) or '::' (IPv6), which is an open address, by default "".
+        port : int, optional
+            The port number to send to, by default 5000.
+        chunk_size : int, optional
+            Size of data chunks to send, by default CHUNK_SIZE.
+        send_delay : float, optional
+            Delay in seconds between sends to avoid filling socket buffer, by default SEND_DELAY.
 
         Returns
         -------
-        bool: if data was transferred successfully
+        bool
+            True if data was transferred successfully, False otherwise.
         """
 
         address = (host, port)
@@ -70,18 +79,20 @@ class UdpSocket:
 
         return True
 
-    def recv(self, buf_size: int) -> "tuple[bool, bytes | None]":
+    def recv(self, buf_size: int) -> Tuple[bool, Optional[bytes]]:
         """
+        Receives data from the socket.
+
         Parameters
         ----------
-        buf_size: int
-            The number of bytes to receive
+        buf_size : int
+            The number of bytes to receive.
 
         Returns
         -------
-        tuple:
-            bool - True if data was received and unpacked successfully, False otherwise
-            bytes | None - The received data, or None if unsuccessful
+        Tuple[bool, Optional[bytes]]
+            First element is True if data was received successfully, False otherwise.
+            Second element is the received data, or None if unsuccessful.
         """
 
         data = b""
@@ -109,7 +120,12 @@ class UdpSocket:
 
     def get_socket(self) -> socket.socket:
         """
-        Getter for the underlying socket objet.
+        Getter for the underlying socket object.
+
+        Returns
+        -------
+        socket.socket
+            The underlying socket object.
         """
 
         return self.__socket

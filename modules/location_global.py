@@ -4,6 +4,8 @@ Location on ground in WGS 84.
 Class with name also available.
 """
 
+from typing import Tuple, Literal, Optional
+
 
 class LocationGlobal:
     """
@@ -15,18 +17,36 @@ class LocationGlobal:
     @classmethod
     def create(
         cls, latitude: float, longitude: float
-    ) -> "tuple[True, LocationGlobal] | tuple[False, None]":
+    ) -> Tuple[Literal[True], "LocationGlobal"]:
         """
-        latitude: Decimal degrees.
-        longitude: Decimal degrees.
+        Create a LocationGlobal instance.
 
-        Return: Success, object.
+        Parameters
+        ----------
+        latitude : float
+            Decimal degrees.
+        longitude : float
+            Decimal degrees.
+
+        Returns
+        -------
+        Tuple[Literal[True], LocationGlobal]
+            Success status and the created LocationGlobal object.
         """
         return True, LocationGlobal(cls.__create_key, latitude, longitude)
 
     def __init__(self, class_private_create_key: object, latitude: float, longitude: float) -> None:
         """
         Private constructor, use create() method.
+
+        Parameters
+        ----------
+        class_private_create_key : object
+            Private key to prevent direct instantiation.
+        latitude : float
+            Decimal degrees.
+        longitude : float
+            Decimal degrees.
         """
         assert class_private_create_key is LocationGlobal.__create_key, "Use create() method."
 
@@ -35,13 +55,23 @@ class LocationGlobal:
 
     def __str__(self) -> str:
         """
-        To string.
+        Convert to string representation.
+
+        Returns
+        -------
+        str
+            String representation of the LocationGlobal object.
         """
         return f"{self.__class__}: latitude: {self.latitude}, longitude: {self.longitude}"
 
     def __repr__(self) -> str:
         """
-        For collections (e.g. list).
+        Representation for collections (e.g. list).
+
+        Returns
+        -------
+        str
+            String representation of the LocationGlobal object.
         """
         return str(self)
 
@@ -58,13 +88,23 @@ class NamedLocationGlobal(LocationGlobal):
     # pylint: disable-next=arguments-differ
     def create(
         cls, name: str, latitude: float, longitude: float
-    ) -> "tuple[True, NamedLocationGlobal] | tuple[False, None]":
+    ) -> Tuple[Literal[True], "NamedLocationGlobal"]:
         """
-        name: Can be empty.
-        latitude: Decimal degrees.
-        longitude: Decimal degrees.
+        Create a NamedLocationGlobal instance.
 
-        Return: Success, object.
+        Parameters
+        ----------
+        name : str
+            Name for the location. Can be empty.
+        latitude : float
+            Decimal degrees.
+        longitude : float
+            Decimal degrees.
+
+        Returns
+        -------
+        Tuple[Literal[True], NamedLocationGlobal]
+            Success status and the created NamedLocationGlobal object.
         """
         return True, NamedLocationGlobal(cls.__create_key, name, latitude, longitude)
 
@@ -73,6 +113,17 @@ class NamedLocationGlobal(LocationGlobal):
     ) -> None:
         """
         Private constructor, use create() method.
+
+        Parameters
+        ----------
+        class_private_create_key : object
+            Private key to prevent direct instantiation.
+        name : str
+            Name for the location.
+        latitude : float
+            Decimal degrees.
+        longitude : float
+            Decimal degrees.
         """
         assert class_private_create_key is NamedLocationGlobal.__create_key, "Use create() method."
 
@@ -82,6 +133,11 @@ class NamedLocationGlobal(LocationGlobal):
 
     def __str__(self) -> str:
         """
-        To string.
+        Convert to string representation.
+
+        Returns
+        -------
+        str
+            String representation of the NamedLocationGlobal object.
         """
         return f"{self.__class__}: name: {self.name}, latitude: {self.latitude}, longitude: {self.longitude}"

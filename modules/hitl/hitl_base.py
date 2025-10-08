@@ -4,6 +4,7 @@ Setup for HITL modules.
 
 import time
 from threading import Event, Thread
+from typing import Optional, Tuple
 from modules.hitl.position_emulator import PositionEmulator
 from modules.hitl.camera_emulator import CameraEmulator
 from ..mavlink import dronekit
@@ -25,20 +26,28 @@ class HITL:
         hitl_enabled: bool,
         position_module: bool,
         camera_module: bool,
-        images_path: str | None = None,
-    ) -> "tuple[True, HITL] | tuple[False, None]":
+        images_path: Optional[str] = None,
+    ) -> Tuple[bool, Optional["HITL"]]:
         """
         Factory method to create a HITL instance.
 
-        Args:
-            drone: The dronekit instance to use for sending MAVLink messages.
-            hitl_enabled: Boolean indicating if HITL is enabled.
-            position_module: Boolean indicating if the position module is enabled.
-            camera_module: Boolean indicating if the camera module is enabled.
-            images_path: Optional path to the images directory for the camera emulator.
+        Parameters
+        ----------
+        drone : dronekit.Vehicle
+            The dronekit instance to use for sending MAVLink messages.
+        hitl_enabled : bool
+            Boolean indicating if HITL is enabled.
+        position_module : bool
+            Boolean indicating if the position module is enabled.
+        camera_module : bool
+            Boolean indicating if the camera module is enabled.
+        images_path : Optional[str], optional
+            Path to the images directory for the camera emulator, by default None.
 
-        Returns:
-            Success, HITL instance | None.
+        Returns
+        -------
+        Tuple[bool, Optional[HITL]]
+            A tuple containing success status and HITL instance (or None if failed).
         """
         if not isinstance(drone, dronekit.Vehicle):
             return False, None
@@ -69,11 +78,22 @@ class HITL:
         self,
         class_private_create_key: object,
         drone: dronekit.Vehicle,
-        position_emulator: "PositionEmulator | None" = None,
-        camera_emulator: "CameraEmulator | None" = None,
+        position_emulator: Optional[PositionEmulator] = None,
+        camera_emulator: Optional[CameraEmulator] = None,
     ) -> None:
         """
         Private constructor, use create() method.
+
+        Parameters
+        ----------
+        class_private_create_key : object
+            Private key to ensure constructor is only called via create().
+        drone : dronekit.Vehicle
+            The dronekit instance to use for sending MAVLink messages.
+        position_emulator : Optional[PositionEmulator], optional
+            Position emulator instance, by default None.
+        camera_emulator : Optional[CameraEmulator], optional
+            Camera emulator instance, by default None.
         """
         assert class_private_create_key is HITL.__create_key, "Use create() method"
 
@@ -81,12 +101,15 @@ class HITL:
         self.position_emulator = position_emulator
         self.camera_emulator = camera_emulator
 
-        self._stop_event: Event | None = None
+        self._stop_event: Optional[Event] = None
         self._threads: list[Thread] = []
 
     def start(self) -> None:
         """
         Start HITL module threads.
+
+        Creates and starts daemon threads for position and camera emulation
+        if their respective emulators are enabled.
         """
         if self._stop_event is not None:
             return
@@ -104,9 +127,14 @@ class HITL:
             self._threads.append(t)
             t.start()
 
-    def shutdown(self, join_timeout: float | None = 5.0) -> None:
+    def shutdown(self, join_timeout: Optional[float] = 5.0) -> None:
         """
         Signal threads to stop and join them.
+
+        Parameters
+        ----------
+        join_timeout : Optional[float], optional
+            Timeout in seconds for joining threads, by default 5.0.
         """
         if self._stop_event is None:
             return
@@ -123,7 +151,9 @@ class HITL:
     def __del__(self) -> None:
         """
         Best-effort cleanup when HITL object is destroyed.
+
         Ensures threads are stopped and the drone connection is closed.
+        This is a destructor that performs cleanup during garbage collection.
         """
         try:
             self.shutdown()
@@ -132,7 +162,11 @@ class HITL:
 
     def run_position(self) -> None:
         """
-        Runs the position emulator periodic function in a loop.
+        Run the position emulator periodic function in a loop.
+
+        This method is intended to be executed in a separate thread.
+        It continuously calls the position emulator's periodic() method
+        until the stop event is set.
         """
         assert self._stop_event is not None
         while not self._stop_event.is_set():
@@ -144,7 +178,11 @@ class HITL:
 
     def run_camera(self) -> None:
         """
-        Runs the camera emulator periodic function in a loop.
+        Run the camera emulator periodic function in a loop.
+
+        This method is intended to be executed in a separate thread.
+        It continuously calls the camera emulator's periodic() method
+        until the stop event is set.
         """
         assert self._stop_event is not None
         while not self._stop_event.is_set():

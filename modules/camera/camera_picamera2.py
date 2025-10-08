@@ -1,8 +1,9 @@
-"""
-Picamera2 implementation of the camera wrapper.
-"""
+"""Picamera2 implementation of the camera wrapper."""
+
+from typing import Optional, Tuple, Literal, Dict, Union
 
 import numpy as np
+from numpy.typing import NDArray
 
 # Picamera2 library only exists on Raspberry Pi
 try:
@@ -17,6 +18,19 @@ from . import base_camera
 class ConfigPiCamera2:
     """
     Configuration for the PiCamera.
+
+    Attributes
+    ----------
+    timeout : float
+        Getting image timeout in seconds.
+    exposure_time : int
+        Exposure time in microseconds.
+    analogue_gain : float
+        Analogue gain value (0.0 to 64.0). ISO = Analogue gain * Digital gain * 100.
+    contrast : float
+        Contrast value (0.0 to 32.0). 0.0 is no contrast, 1.0 is normal contrast, higher is more contrast.
+    maybe_lens_position : Optional[float]
+        Position of the lens in dioptres (reciprocal of metres: 1/m). 0 means infinite distance.
     """
 
     def __init__(
@@ -25,15 +39,23 @@ class ConfigPiCamera2:
         exposure_time: int = 250,
         analogue_gain: float = 64.0,
         contrast: float = 1.0,
-        maybe_lens_position: float | None = None,
+        maybe_lens_position: Optional[float] = None,
     ) -> None:
         """
-        timeout: Getting image timeout in seconds.
+        Initialize PiCamera2 configuration.
 
-        exposure_time: Microseconds.
-        analogue_gain: 0.0 to 64.0 . ISO = Analogue gain * Digital gain * 100 .
-        contrast: 0.0 to 32.0 . 0.0 is no contrast, 1.0 is normal contrast, higher is more contrast.
-        lens_position: Position of the lens is dioptres (reciprocal of metres: 1/m ) (0 means infinite distance).
+        Parameters
+        ----------
+        timeout : float, optional
+            Getting image timeout in seconds. Default is 1.0.
+        exposure_time : int, optional
+            Exposure time in microseconds. Default is 250.
+        analogue_gain : float, optional
+            Analogue gain value (0.0 to 64.0). ISO = Analogue gain * Digital gain * 100. Default is 64.0.
+        contrast : float, optional
+            Contrast value (0.0 to 32.0). 0.0 is no contrast, 1.0 is normal contrast, higher is more contrast. Default is 1.0.
+        maybe_lens_position : Optional[float], optional
+            Position of the lens in dioptres (reciprocal of metres: 1/m). 0 means infinite distance. Default is None.
         """
         self.timeout = timeout
 
@@ -42,11 +64,16 @@ class ConfigPiCamera2:
         self.contrast = contrast
         self.maybe_lens_position = maybe_lens_position
 
-    def to_dict(self) -> dict[str, int | float]:
+    def to_dict(self) -> Dict[str, Union[int, float, object]]:
         """
-        Dictionary containing camera controls.
+        Create dictionary containing camera controls.
+
+        Returns
+        -------
+        Dict[str, Union[int, float, object]]
+            Dictionary containing camera control parameters.
         """
-        camera_controls = {
+        camera_controls: Dict[str, Union[int, float, object]] = {
             "ExposureTime": self.exposure_time,
             "AnalogueGain": self.analogue_gain,
             "Contrast": self.contrast,
@@ -66,21 +93,49 @@ if picamera2 is None:
 
     class CameraPiCamera2(base_camera.BaseCameraDevice):
         """
-        Class for the Picamera2 import failure.
+        Placeholder class for Picamera2 when library is not available.
+
+        This class is used when the picamera2 library cannot be imported,
+        typically on non-Raspberry Pi systems.
         """
 
         @classmethod
-        def create(cls, width: int, height: int, config: ConfigPiCamera2) -> "tuple[False, None]":
+        def create(
+            cls, width: int, height: int, config: ConfigPiCamera2
+        ) -> Tuple[Literal[False], None]:
+            """
+            Create method that always fails when picamera2 is not available.
+
+            Parameters
+            ----------
+            width : int
+                Width of the camera in pixels.
+            height : int
+                Height of the camera in pixels.
+            config : ConfigPiCamera2
+                Configuration for PiCamera2 camera.
+
+            Returns
+            -------
+            tuple[Literal[False], None]
+                Always returns (False, None) since picamera2 is not available.
+            """
             return False, None
 
         def __init__(self) -> None:
+            """
+            Initialize placeholder camera object.
+            """
             pass
 
 else:
 
     class CameraPiCamera2(base_camera.BaseCameraDevice):
         """
-        Class for the Picamera2 implementation of the camera.
+        Picamera2 implementation of the camera device.
+
+        This class provides camera functionality using the Picamera2 library
+        for Raspberry Pi camera modules.
         """
 
         __create_key = object()
@@ -88,17 +143,24 @@ else:
         @classmethod
         def create(
             cls, width: int, height: int, config: ConfigPiCamera2
-        ) -> "tuple[True, CameraPiCamera2] | tuple[False, None]":
+        ) -> Tuple[Literal[True], "CameraPiCamera2"] | Tuple[Literal[False], None]:
             """
-            Picamera2 Camera.
+            Create a Picamera2 camera instance.
 
-            width: Width of the camera.
-            height: Height of the camera.
-            config: Configuration for PiCamera2 camera.
+            Parameters
+            ----------
+            width : int
+                Width of the camera in pixels.
+            height : int
+                Height of the camera in pixels.
+            config : ConfigPiCamera2
+                Configuration for PiCamera2 camera.
 
-            Return: Success, camera object.
+            Returns
+            -------
+            tuple[Literal[True], CameraPiCamera2] | tuple[Literal[False], None]
+                Success status and camera object if successful, (False, None) otherwise.
             """
-
             if width <= 0:
                 return False, None
 
@@ -128,6 +190,15 @@ else:
         ) -> None:
             """
             Private constructor, use create() method.
+
+            Parameters
+            ----------
+            class_private_create_key : object
+                Private key to prevent direct instantiation.
+            camera : picamera2.Picamera2
+                Picamera2 camera object.
+            config : ConfigPiCamera2
+                Configuration for PiCamera2 camera.
             """
             assert class_private_create_key is CameraPiCamera2.__create_key, "Use create() method."
 
@@ -140,11 +211,15 @@ else:
             """
             self.__camera.close()
 
-        def run(self) -> tuple[True, np.ndarray] | tuple[False, None]:
+        def run(self) -> Tuple[Literal[True], NDArray[np.uint8]] | Tuple[Literal[False], None]:
             """
-            Takes a picture with Picamera2 camera.
+            Take a picture with Picamera2 camera.
 
-            Return: Success, image with shape (height, width, channels in BGR).
+            Returns
+            -------
+            tuple[Literal[True], NDArray[np.uint8]] | tuple[Literal[False], None]
+                Success status and image array with shape (height, width, channels in RGB)
+                if successful, (False, None) otherwise.
             """
             try:
                 image_data = self.__camera.capture_array(wait=self.__config.timeout)

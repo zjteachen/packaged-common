@@ -4,6 +4,7 @@ Logger setup for `main()` .
 
 import datetime
 import pathlib
+from typing import Dict, Optional, Tuple
 
 from . import logger
 
@@ -13,17 +14,29 @@ MAX_ATTEMPTS = 3
 
 
 def setup_main_logger(
-    config: "dict",
+    config: Dict,
     main_logger_name: str = MAIN_LOGGER_NAME,
     enable_log_to_file: bool = True,
     max_attempts: int = MAX_ATTEMPTS,
-) -> tuple[True, logger.Logger, pathlib.Path] | tuple[False, None, None]:
+) -> Tuple[bool, Optional[logger.Logger], Optional[pathlib.Path]]:
     """
-    Setup prerequisites for logging in `main()` .
+    Setup prerequisites for logging in `main()`.
 
-    config: The configuration.
+    Parameters
+    ----------
+    config : Dict
+        The configuration dictionary containing logger settings.
+    main_logger_name : str, optional
+        Name of the main logger, by default MAIN_LOGGER_NAME.
+    enable_log_to_file : bool, optional
+        Whether to enable logging to file, by default True.
+    max_attempts : int, optional
+        Maximum attempts to create unique log directory, by default MAX_ATTEMPTS.
 
-    Returns: Success, logger, logger path.
+    Returns
+    -------
+    Tuple[bool, Optional[logger.Logger], Optional[pathlib.Path]]
+        Success status, logger instance (None if failed), and logger path (None if failed).
     """
     # Get settings
     try:

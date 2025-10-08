@@ -59,7 +59,9 @@ def create_package_structure(modules: list[str]):
 
     # Create __init__.py for the package
     init_file = warg_common_dir / "__init__.py"
-    init_file.write_text('"""WARG Common package with shared modules."""\n\n__version__ = "0.1.0"\n')
+    init_file.write_text(
+        '"""WARG Common package with shared modules."""\n\n__version__ = "0.1.0"\n'
+    )
 
     # Copy each specified module
     modules_dir = Path("modules")
@@ -70,7 +72,9 @@ def create_package_structure(modules: list[str]):
             copied_modules.append(module)
 
     # Copy module-level files if they exist
-    for file_name in ["__init__.py"] + [f for f in modules_dir.glob("*.py") if f.name != "__init__.py"]:
+    for file_name in ["__init__.py"] + [
+        f for f in modules_dir.glob("*.py") if f.name != "__init__.py"
+    ]:
         if file_name == "__init__.py":
             continue  # We already created our own __init__.py
         source_file = modules_dir / file_name if isinstance(file_name, str) else file_name
@@ -88,7 +92,7 @@ def build_wheel():
     result = subprocess.run(
         [sys.executable, "-m", "build", "--wheel"],
         capture_output=True,
-        text=True
+        text=True,
     )
 
     if result.returncode == 0:
@@ -104,18 +108,12 @@ def build_wheel():
 
 
 def main():
-    parser = argparse.ArgumentParser(
-        description="Build warg_common package with selected modules"
+    parser = argparse.ArgumentParser(description="Build warg_common package with selected modules")
+    parser.add_argument(
+        "modules", nargs="+", help="Modules to include in the package (e.g., camera network logger)"
     )
     parser.add_argument(
-        "modules",
-        nargs="+",
-        help="Modules to include in the package (e.g., camera network logger)"
-    )
-    parser.add_argument(
-        "--no-clean",
-        action="store_true",
-        help="Don't clean build directories before building"
+        "--no-clean", action="store_true", help="Don't clean build directories before building"
     )
 
     args = parser.parse_args()

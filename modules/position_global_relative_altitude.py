@@ -4,6 +4,8 @@
 Class with name also available.
 """
 
+from typing import Tuple, Literal, Optional
+
 
 class PositionGlobalRelativeAltitude:
     """
@@ -17,13 +19,23 @@ class PositionGlobalRelativeAltitude:
     @classmethod
     def create(
         cls, latitude: float, longitude: float, relative_altitude: float
-    ) -> "tuple[True, PositionGlobalRelativeAltitude] | tuple[False, None]":
+    ) -> Tuple[Literal[True], "PositionGlobalRelativeAltitude"]:
         """
-        latitude: Decimal degrees.
-        longitude: Decimal degrees.
-        relative_altitude: Metres above home position. Can be negative.
+        Create a PositionGlobalRelativeAltitude instance.
 
-        Return: Success, object.
+        Parameters
+        ----------
+        latitude : float
+            Decimal degrees.
+        longitude : float
+            Decimal degrees.
+        relative_altitude : float
+            Metres above home position. Can be negative.
+
+        Returns
+        -------
+        Tuple[Literal[True], PositionGlobalRelativeAltitude]
+            Success status and the created PositionGlobalRelativeAltitude object.
         """
         return True, PositionGlobalRelativeAltitude(
             cls.__create_key, latitude, longitude, relative_altitude
@@ -38,6 +50,17 @@ class PositionGlobalRelativeAltitude:
     ) -> None:
         """
         Private constructor, use create() method.
+
+        Parameters
+        ----------
+        class_private_create_key : object
+            Private key to prevent direct instantiation.
+        latitude : float
+            Decimal degrees.
+        longitude : float
+            Decimal degrees.
+        relative_altitude : float
+            Metres above home position. Can be negative.
         """
         assert (
             class_private_create_key is PositionGlobalRelativeAltitude.__create_key
@@ -49,13 +72,23 @@ class PositionGlobalRelativeAltitude:
 
     def __str__(self) -> str:
         """
-        To string.
+        Convert to string representation.
+
+        Returns
+        -------
+        str
+            String representation of the PositionGlobalRelativeAltitude object.
         """
         return f"{self.__class__}: latitude: {self.latitude}, longitude: {self.longitude}, relative altitude: {self.relative_altitude}"
 
     def __repr__(self) -> str:
         """
-        For collections (e.g. list).
+        Representation for collections (e.g. list).
+
+        Returns
+        -------
+        str
+            String representation of the PositionGlobalRelativeAltitude object.
         """
         return str(self)
 
@@ -76,14 +109,25 @@ class NamedPositionGlobalRelativeAltitude(PositionGlobalRelativeAltitude):
         latitude: float,
         longitude: float,
         relative_altitude: float,
-    ) -> "tuple[True, NamedPositionGlobalRelativeAltitude] | tuple[False, None]":
+    ) -> Tuple[Literal[True], "NamedPositionGlobalRelativeAltitude"]:
         """
-        name: Can be empty.
-        latitude: Decimal degrees.
-        longitude: Decimal degrees.
-        relative_altitude: Metres above home position. Can be negative.
+        Create a NamedPositionGlobalRelativeAltitude instance.
 
-        Return: Success, object.
+        Parameters
+        ----------
+        name : str
+            Name for the position. Can be empty.
+        latitude : float
+            Decimal degrees.
+        longitude : float
+            Decimal degrees.
+        relative_altitude : float
+            Metres above home position. Can be negative.
+
+        Returns
+        -------
+        Tuple[Literal[True], NamedPositionGlobalRelativeAltitude]
+            Success status and the created NamedPositionGlobalRelativeAltitude object.
         """
         return True, NamedPositionGlobalRelativeAltitude(
             cls.__create_key, name, latitude, longitude, relative_altitude
@@ -99,6 +143,19 @@ class NamedPositionGlobalRelativeAltitude(PositionGlobalRelativeAltitude):
     ) -> None:
         """
         Private constructor, use create() method.
+
+        Parameters
+        ----------
+        class_private_create_key : object
+            Private key to prevent direct instantiation.
+        name : str
+            Name for the position.
+        latitude : float
+            Decimal degrees.
+        longitude : float
+            Decimal degrees.
+        relative_altitude : float
+            Metres above home position. Can be negative.
         """
         assert (
             class_private_create_key is NamedPositionGlobalRelativeAltitude.__create_key
@@ -115,6 +172,11 @@ class NamedPositionGlobalRelativeAltitude(PositionGlobalRelativeAltitude):
 
     def __str__(self) -> str:
         """
-        To string.
+        Convert to string representation.
+
+        Returns
+        -------
+        str
+            String representation of the NamedPositionGlobalRelativeAltitude object.
         """
         return f"{self.__class__}: name: {self.name}, latitude: {self.latitude}, longitude: {self.longitude}, relative_altitude: {self.relative_altitude}"

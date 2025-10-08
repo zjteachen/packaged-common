@@ -1,10 +1,11 @@
-"""
-ArducamIR implementation of the camera wrapper.
-"""
+"""ArducamIR implementation of the camera wrapper."""
 
 import enum
-import numpy as np
+from typing import Optional, Tuple, Literal
+
 import cv2
+import numpy as np
+from numpy.typing import NDArray
 
 import ArducamEvkSDK
 import arducam_rgbir_remosaic
@@ -16,7 +17,14 @@ CAMERA_CONFIG_DIR = "./config/camera_config.cfg"
 
 class ArducamOutput(enum.Enum):
     """
-    Enum for ArducamIR output
+    Enum for ArducamIR output type.
+
+    Attributes
+    ----------
+    RGB : int
+        RGB image output.
+    IR : int
+        Infrared image output.
     """
 
     RGB = 0
@@ -25,7 +33,10 @@ class ArducamOutput(enum.Enum):
 
 class CameraArducamIR(base_camera.BaseCameraDevice):
     """
-    Class for the ArducamSDK implementation of the ArducamIR camera.
+    ArducamSDK implementation of the ArducamIR camera device.
+
+    This class provides camera functionality using the ArducamEvkSDK library
+    for Arducam RGB-IR camera modules.
     """
 
     __create_key = object()
@@ -33,8 +44,24 @@ class CameraArducamIR(base_camera.BaseCameraDevice):
     @classmethod
     def create(
         cls, width: int, height: int, config: None
-    ) -> "tuple[True, CameraArducamIR] | tuple[False, None]":
+    ) -> Tuple[Literal[True], "CameraArducamIR"] | Tuple[Literal[False], None]:
+        """
+        Create an ArducamIR camera instance.
 
+        Parameters
+        ----------
+        width : int
+            Width of the camera in pixels (unused for ArducamIR).
+        height : int
+            Height of the camera in pixels (unused for ArducamIR).
+        config : None
+            Configuration parameter (unused for ArducamIR).
+
+        Returns
+        -------
+        tuple[Literal[True], CameraArducamIR] | tuple[Literal[False], None]
+            Success status and camera object if successful, (False, None) otherwise.
+        """
         camera = ArducamEvkSDK.Camera()
 
         param = ArducamEvkSDK.Param()
@@ -52,6 +79,13 @@ class CameraArducamIR(base_camera.BaseCameraDevice):
     ) -> None:
         """
         Private constructor, use create() method.
+
+        Parameters
+        ----------
+        class_private_create_key : object
+            Private key to prevent direct instantiation.
+        camera : ArducamEvkSDK.Camera
+            ArducamEvkSDK Camera object.
         """
         assert class_private_create_key is CameraArducamIR.__create_key, "Use create() method."
 
@@ -66,11 +100,14 @@ class CameraArducamIR(base_camera.BaseCameraDevice):
         self.__camera.stop()
         self.__camera.close()
 
-    def run(self) -> tuple[True, ArducamEvkSDK.Frame] | tuple[False, None]:
+    def run(self) -> Tuple[Literal[True], ArducamEvkSDK.Frame] | Tuple[Literal[False], None]:
         """
-        Takes a picture with ArducamIR camera.
+        Take a picture with ArducamIR camera.
 
-        Return: Success, Frame
+        Returns
+        -------
+        tuple[Literal[True], ArducamEvkSDK.Frame] | tuple[Literal[False], None]
+            Success status and raw Frame object if successful, (False, None) otherwise.
         """
         image_data = self.__camera.capture()
         if image_data is None:
@@ -78,9 +115,26 @@ class CameraArducamIR(base_camera.BaseCameraDevice):
 
         return True, image_data
 
-    def demosaic(self, image: ArducamEvkSDK.Frame, output: ArducamOutput) -> np.ndarray | None:
+    def demosaic(
+        self, image: ArducamEvkSDK.Frame, output: ArducamOutput
+    ) -> Optional[NDArray[np.uint8]]:
         """
-        Converts Bayer Pattern & IR data to OpenCV Matrix
+        Convert Bayer Pattern and IR data to OpenCV matrix.
+
+        This method processes the raw sensor data and converts it to either
+        RGB or IR image format.
+
+        Parameters
+        ----------
+        image : ArducamEvkSDK.Frame
+            Raw frame from ArducamIR camera.
+        output : ArducamOutput
+            Desired output type (RGB or IR).
+
+        Returns
+        -------
+        Optional[NDArray[np.uint8]]
+            Processed image array in BGRA format, or None on failure.
         """
         # Convert sensor data to useable format
         data = self.format(image)
@@ -94,9 +148,22 @@ class CameraArducamIR(base_camera.BaseCameraDevice):
         # Resize the IR image so that they are both the same size
         return cv2.resize(ir_color, (bayer.shape[1], bayer.shape[0]))
 
-    def format(self, image: ArducamEvkSDK.Frame) -> np.ndarray:
+    def format(self, image: ArducamEvkSDK.Frame) -> NDArray[np.uint8]:
         """
-        Formats byte buffer sensor input into 8-bit arrays
+        Format byte buffer sensor input into 8-bit arrays.
+
+        This method converts the raw sensor data from the camera into a
+        standardized 8-bit numpy array format.
+
+        Parameters
+        ----------
+        image : ArducamEvkSDK.Frame
+            Raw frame from ArducamIR camera.
+
+        Returns
+        -------
+        NDArray[np.uint8]
+            Formatted 8-bit image array with shape (height, width).
         """
         width = image.format.width
         height = image.format.height

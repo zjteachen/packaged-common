@@ -2,6 +2,8 @@
 Position in local Euclidean space (origin at home position global).
 """
 
+from typing import Tuple, Literal, Optional
+
 
 class PositionLocal:
     """
@@ -13,13 +15,23 @@ class PositionLocal:
     @classmethod
     def create(
         cls, north: float, east: float, down: float
-    ) -> "tuple[True, PositionLocal] | tuple[False, None]":
+    ) -> Tuple[Literal[True], "PositionLocal"]:
         """
-        north: Metres.
-        east: Metres.
-        down: Metres. Allowed to be positive, which is below the home position.
+        Create a PositionLocal instance.
 
-        Return: Success, object.
+        Parameters
+        ----------
+        north : float
+            Metres.
+        east : float
+            Metres.
+        down : float
+            Metres. Allowed to be positive, which is below the home position.
+
+        Returns
+        -------
+        Tuple[Literal[True], PositionLocal]
+            Success status and the created PositionLocal object.
         """
         return True, PositionLocal(cls.__create_key, north, east, down)
 
@@ -28,6 +40,17 @@ class PositionLocal:
     ) -> None:
         """
         Private constructor, use create() method.
+
+        Parameters
+        ----------
+        class_private_create_key : object
+            Private key to prevent direct instantiation.
+        north : float
+            Metres.
+        east : float
+            Metres.
+        down : float
+            Metres. Allowed to be positive, which is below the home position.
         """
         assert class_private_create_key is PositionLocal.__create_key, "Use create() method."
 
@@ -37,13 +60,23 @@ class PositionLocal:
 
     def __str__(self) -> str:
         """
-        To string.
+        Convert to string representation.
+
+        Returns
+        -------
+        str
+            String representation of the PositionLocal object.
         """
         return f"{self.__class__}: north: {self.north}, east: {self.east}, down: {self.down}"
 
     def __repr__(self) -> str:
         """
-        For collections (e.g. list).
+        Representation for collections (e.g. list).
+
+        Returns
+        -------
+        str
+            String representation of the PositionLocal object.
         """
         return str(self)
 
@@ -64,14 +97,25 @@ class NamedPositionLocal(PositionLocal):
         north: float,
         east: float,
         down: float,
-    ) -> "tuple[True, NamedPositionLocal] | tuple[False, None]":
+    ) -> Tuple[Literal[True], "NamedPositionLocal"]:
         """
-        name: Can be empty.
-        north: Metres.
-        east: Metres.
-        down: Metres. Allowed to be positive, which is below the home position.
+        Create a NamedPositionLocal instance.
 
-        Return: Success, object.
+        Parameters
+        ----------
+        name : str
+            Name for the position. Can be empty.
+        north : float
+            Metres.
+        east : float
+            Metres.
+        down : float
+            Metres. Allowed to be positive, which is below the home position.
+
+        Returns
+        -------
+        Tuple[Literal[True], NamedPositionLocal]
+            Success status and the created NamedPositionLocal object.
         """
         return True, NamedPositionLocal(cls.__create_key, name, north, east, down)
 
@@ -80,6 +124,19 @@ class NamedPositionLocal(PositionLocal):
     ) -> None:
         """
         Private constructor, use create() method.
+
+        Parameters
+        ----------
+        class_private_create_key : object
+            Private key to prevent direct instantiation.
+        name : str
+            Name for the position.
+        north : float
+            Metres.
+        east : float
+            Metres.
+        down : float
+            Metres. Allowed to be positive, which is below the home position.
         """
         assert class_private_create_key is NamedPositionLocal.__create_key, "Use create() method."
 
@@ -89,6 +146,11 @@ class NamedPositionLocal(PositionLocal):
 
     def __str__(self) -> str:
         """
-        To string.
+        Convert to string representation.
+
+        Returns
+        -------
+        str
+            String representation of the NamedPositionLocal object.
         """
         return f"{self.__class__}: name: {self.name}, north: {self.north}, east: {self.east}, down: {self.down}"

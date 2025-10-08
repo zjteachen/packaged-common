@@ -3,6 +3,7 @@ Wrapper for server socket operations.
 """
 
 import socket
+from typing import Optional, Tuple
 
 from .socket_wrapper import UdpSocket
 
@@ -21,6 +22,13 @@ class UdpServerSocket(UdpSocket):
     ) -> None:
         """
         Private Constructor, use create() method.
+
+        Parameters
+        ----------
+        class_private_create_key : object
+            Private key to ensure constructor is only called from create() method.
+        socket_instance : socket.socket
+            The socket instance to wrap.
         """
 
         assert class_private_create_key is UdpServerSocket.__create_key, "Use create() method"
@@ -30,26 +38,26 @@ class UdpServerSocket(UdpSocket):
     @classmethod
     def create(
         cls, host: str = "", port: int = 5000, connection_timeout: float = 60.0
-    ) -> "tuple[bool, UdpServerSocket | None]":
+    ) -> Tuple[bool, Optional["UdpServerSocket"]]:
         """
         Creates a UDP server socket bound to the provided host and port.
 
         Parameters
         ----------
-        host: str (default "")
-            The hostname or IP address to bind the socket to.
-        port: int (default 5000)
-            The port number to bind the socket to.
-        connection_timeout: float (default 60.0)
-            Timeout for establishing connection, in seconds
+        host : str, optional
+            The hostname or IP address to bind the socket to, by default "".
+        port : int, optional
+            The port number to bind the socket to, by default 5000.
+        connection_timeout : float, optional
+            Timeout for establishing connection, in seconds, by default 60.0.
 
         Returns
         -------
-        tuple[bool, UdpServerSocket | None]
+        Tuple[bool, Optional[UdpServerSocket]]
             The first parameter represents if the socket creation is successful.
-                - If it is not successful, the second parameter will be None.
-                - If it is successful, the second parameter will be the created
-                    UdpServerSocket object.
+            - If it is not successful, the second parameter will be None.
+            - If it is successful, the second parameter will be the created
+              UdpServerSocket object.
         """
 
         if connection_timeout <= 0:

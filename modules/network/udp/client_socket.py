@@ -3,6 +3,7 @@ Wrapper for UDP client socket operations.
 """
 
 import socket
+from typing import Optional, Tuple
 
 from .socket_wrapper import UdpSocket
 
@@ -18,10 +19,19 @@ class UdpClientSocket(UdpSocket):
         self,
         class_private_create_key: object,
         socket_instance: socket.socket,
-        server_address: tuple,
+        server_address: Tuple[str, int],
     ) -> None:
         """
         Private Constructor, use create() method.
+
+        Parameters
+        ----------
+        class_private_create_key : object
+            Private key to ensure constructor is only called from create() method.
+        socket_instance : socket.socket
+            The socket instance to wrap.
+        server_address : Tuple[str, int]
+            The server address as (host, port).
         """
 
         assert class_private_create_key is UdpClientSocket.__create_key
@@ -32,25 +42,25 @@ class UdpClientSocket(UdpSocket):
     @classmethod
     def create(
         cls, host: str = "localhost", port: int = 5000, connection_timeout: float = 60.0
-    ) -> "tuple[bool, UdpClientSocket | None]":
+    ) -> Tuple[bool, Optional["UdpClientSocket"]]:
         """
         Initializes UDP client socket with the appropriate server address.
 
         Parameters
         ----------
-        host: str (default "localhost")
-            The hostname or IP address of the server.
-        port: int (default 5000)
-            The port number of the server.
-        connection_timeout: float (default 60.0)
-            Timeout for establishing connection, in seconds
+        host : str, optional
+            The hostname or IP address of the server, by default "localhost".
+        port : int, optional
+            The port number of the server, by default 5000.
+        connection_timeout : float, optional
+            Timeout for establishing connection, in seconds, by default 60.0.
 
         Returns
         -------
-        tuple[bool, UdpClientSocket | None]
+        Tuple[bool, Optional[UdpClientSocket]]
             The boolean value represents whether the initialization was successful or not.
-                - If it is not successful, the second parameter will be None.
-                - If it is successful, the method will return True and a UdpClientSocket object will be created.
+            - If it is not successful, the second parameter will be None.
+            - If it is successful, the method will return True and a UdpClientSocket object will be created.
         """
 
         if connection_timeout <= 0:
@@ -81,12 +91,13 @@ class UdpClientSocket(UdpSocket):
 
         Parameters
         ----------
-        data: bytes
-            Takes in raw data that we wish to send
+        data : bytes
+            The raw data to send.
 
         Returns
         -------
-        bool: True if data is sent successfully, and false if it fails to send
+        bool
+            True if data is sent successfully, False if it fails to send.
         """
 
         try:
@@ -104,7 +115,7 @@ class UdpClientSocket(UdpSocket):
 
         Parameters
         ----------
-        bufsize: int
+        buf_size : int
             The amount of data to be received.
 
         Raises

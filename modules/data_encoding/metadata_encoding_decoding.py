@@ -1,10 +1,11 @@
 """
 Encoding and Decoding Metadata
-Save first byte as char to represent which worker sent the message 
+Save first byte as char to represent which worker sent the message
 """
 
 import base64
 import struct
+from typing import Optional, Tuple
 
 from . import worker_enum
 
@@ -14,18 +15,24 @@ DATA_FORMAT = "=Bi"  # 1 unsigned char + 1 int = 5 bytes
 
 def encode_metadata(
     worker_id: worker_enum.WorkerEnum, number_of_messages: int
-) -> "tuple[True, bytes] | tuple[False, None]":
+) -> Tuple[bool, Optional[bytes]]:
     """
-    Encode PositionGlobal object into a C-style string for STATUSTEXT message.
+    Encode metadata into a C-style string for STATUSTEXT message.
     Worker_ID to be encoded as the first byte of the message.
 
-    Parameters:
-       worker_id: ID of the worker defined by its constant in WorkerEnum.
-       number_of_messages: number of messages intended to be sent.
+    Parameters
+    ----------
+    worker_id : worker_enum.WorkerEnum
+        ID of the worker defined by its constant in WorkerEnum.
+    number_of_messages : int
+        Number of messages intended to be sent.
 
-    Returns:
-        packed_metadata (bytes): Encoded int corresponding to number of messages as bytes.
-        First byte depends on which worker is calling the funciton, value depends on its corresponding enum value (see worker_enum.py)
+    Returns
+    -------
+    Tuple[bool, Optional[bytes]]
+        Success status and encoded bytes containing number of messages.
+        First byte depends on which worker is calling the function (its enum value).
+        Returns (False, None) on encoding failure.
     """
     try:
         # Ensure worker ID is in the WorkerEnum class
@@ -49,15 +56,20 @@ def encode_metadata(
 
 def decode_metadata(
     encoded_str: bytes,
-) -> "tuple[True, worker_enum.WorkerEnum, int] | tuple[False, None, None]":
+) -> Tuple[bool, Optional[worker_enum.WorkerEnum], Optional[int]]:
     """
-    Decode bytes into a PositionGlobal object.
+    Decode bytes into metadata.
 
-    Parameters:
-        encoded_message (bytes): Encoded bytearray containing Worker message ID, number of messages sent.
+    Parameters
+    ----------
+    encoded_str : bytes
+        Encoded bytearray containing Worker message ID and number of messages sent.
 
-    Returns:
-        Tuple: success, WorkerEnum member instance corresponding to ID, number of messages received as an integer.
+    Returns
+    -------
+    Tuple[bool, Optional[worker_enum.WorkerEnum], Optional[int]]
+        Success status, WorkerEnum member instance corresponding to ID, and number of messages received.
+        Returns (False, None, None) on decoding failure.
     """
     # Unpack the byte sequence
     try:

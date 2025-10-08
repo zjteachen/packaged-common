@@ -3,6 +3,7 @@ Wrapper for TCP server socket operations.
 """
 
 import socket
+from typing import Optional, Tuple
 
 from .socket_wrapper import TcpSocket
 
@@ -17,6 +18,13 @@ class TcpServerSocket(TcpSocket):
     def __init__(self, class_private_create_key: object, socket_instance: socket.socket) -> None:
         """
         Private constructor, use create() method.
+
+        Parameters
+        ----------
+        class_private_create_key : object
+            Private key to ensure constructor is only called from create() method.
+        socket_instance : socket.socket
+            The socket instance to wrap.
         """
 
         assert class_private_create_key is TcpServerSocket.__create_key, "Use create() method"
@@ -26,11 +34,11 @@ class TcpServerSocket(TcpSocket):
     @classmethod
     def create(
         cls,
-        instance: socket.socket = None,
+        instance: Optional[socket.socket] = None,
         host: str = "",
         port: int = 5000,
         connection_timeout: float = 60.0,
-    ) -> "tuple[bool, TcpServerSocket | None]":
+    ) -> Tuple[bool, Optional["TcpServerSocket"]]:
         """
         Establishes socket connection through provided host and port.
             Note: Although in practice a TCP 'server' simply connects 2 clients together,
@@ -38,19 +46,19 @@ class TcpServerSocket(TcpSocket):
 
         Parameters
         ----------
-        instance: socket.socket (default None)
-            For initializing Socket with an existing socket object.
-        host: str (default "")
+        instance : Optional[socket.socket], optional
+            For initializing Socket with an existing socket object, by default None.
+        host : str, optional
             Empty string is interpreted as '0.0.0.0' (IPv4) or '::' (IPv6), which is all addresses.
-            Could also use socket.gethostname(). (needed to enable other machines to connect)
-        port: int (default 5000)
-            The host combined with the port will form an address (e.g. localhost:5000)
-        connection_timeout: float (default 60.0)
-            Timeout for operations such as recieve
+            Could also use socket.gethostname() (needed to enable other machines to connect), by default "".
+        port : int, optional
+            The port number to bind to, by default 5000.
+        connection_timeout : float, optional
+            Timeout for operations such as receive, by default 60.0.
 
         Returns
         -------
-        tuple[bool, TcpServerSocket | None]
+        Tuple[bool, Optional[TcpServerSocket]]
             The first parameter represents if the socket creation is successful.
             - If it is not successful, the second parameter will be None.
             - If it is successful, the second parameter will be the created

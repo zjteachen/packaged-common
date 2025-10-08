@@ -3,6 +3,7 @@ Wrapper for TCP client socket operations.
 """
 
 import socket
+from typing import Optional, Tuple
 
 from .socket_wrapper import TcpSocket
 
@@ -17,6 +18,13 @@ class TcpClientSocket(TcpSocket):
     def __init__(self, class_private_create_key: object, socket_instance: socket.socket) -> None:
         """
         Private constructor, use create() method.
+
+        Parameters
+        ----------
+        class_private_create_key : object
+            Private key to ensure constructor is only called from create() method.
+        socket_instance : socket.socket
+            The socket instance to wrap.
         """
 
         assert class_private_create_key is TcpClientSocket.__create_key, "Use create() method"
@@ -26,27 +34,28 @@ class TcpClientSocket(TcpSocket):
     @classmethod
     def create(
         cls,
-        instance: socket.socket = None,
+        instance: Optional[socket.socket] = None,
         host: str = "localhost",
         port: int = 5000,
         connection_timeout: float = 60.0,
-    ) -> "tuple[bool, TcpClientSocket | None]":
+    ) -> Tuple[bool, Optional["TcpClientSocket"]]:
         """
         Establishes socket connection through provided host and port.
 
         Parameters
         ----------
-        instance: socket.socket (default None)
-            For initializing Socket with an existing socket object.
-        host: str (default "localhost")
-        port: int (default 5000)
-            The host combined with the port will form an address (e.g. localhost:5000)
-        connection_timeout: float (default 60.0)
-            Timeout for establishing connection, in seconds
+        instance : Optional[socket.socket], optional
+            For initializing Socket with an existing socket object, by default None.
+        host : str, optional
+            The hostname or IP address to connect to, by default "localhost".
+        port : int, optional
+            The port number to connect to, by default 5000.
+        connection_timeout : float, optional
+            Timeout for establishing connection, in seconds, by default 60.0.
 
         Returns
         -------
-        tuple[bool, TcpClientSocket | None]
+        Tuple[bool, Optional[TcpClientSocket]]
             The first parameter represents if the socket creation is successful.
             - If it is not successful, the second parameter will be None.
             - If it is successful, the second parameter will be the created TcpClientSocket object.

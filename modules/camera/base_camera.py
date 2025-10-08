@@ -1,15 +1,17 @@
-"""
-Base class for camera device.
-"""
+"""Base class for camera device."""
 
 import abc
+from typing import Optional, Tuple, Literal
 
 import numpy as np
+from numpy.typing import NDArray
 
 
 class BaseCameraDevice(abc.ABC):
     """
     Abstract class for camera device implementations.
+
+    This class provides an interface for camera devices that can capture images.
     """
 
     @classmethod
@@ -19,15 +21,23 @@ class BaseCameraDevice(abc.ABC):
         width: int,
         height: int,
         config: object,
-    ) -> "tuple[True, BaseCameraDevice] | tuple[False, None]":
+    ) -> Tuple[Literal[True], "BaseCameraDevice"] | Tuple[Literal[False], None]:
         """
         Abstract create method.
 
-        width: Width of the camera.
-        height: Height of the camera.
-        config: Configuration.
+        Parameters
+        ----------
+        width : int
+            Width of the camera in pixels.
+        height : int
+            Height of the camera in pixels.
+        config : object
+            Configuration object for the camera.
 
-        Return: Success, camera object.
+        Returns
+        -------
+        tuple[Literal[True], BaseCameraDevice] | tuple[Literal[False], None]
+            Success status and camera object if successful, (False, None) otherwise.
         """
         raise NotImplementedError
 
@@ -35,6 +45,13 @@ class BaseCameraDevice(abc.ABC):
     def __init__(self, class_private_create_key: object, camera: object) -> None:
         """
         Abstract private constructor.
+
+        Parameters
+        ----------
+        class_private_create_key : object
+            Private key to prevent direct instantiation.
+        camera : object
+            Camera device object.
         """
         raise NotImplementedError
 
@@ -46,10 +63,14 @@ class BaseCameraDevice(abc.ABC):
         raise NotImplementedError
 
     @abc.abstractmethod
-    def run(self) -> tuple[True, np.ndarray] | tuple[False, None]:
+    def run(self) -> Tuple[Literal[True], NDArray[np.uint8]] | Tuple[Literal[False], None]:
         """
-        Takes a picture with camera device.
+        Take a picture with camera device.
 
-        Return: Success, image with shape (height, width, channels in BGR).
+        Returns
+        -------
+        tuple[Literal[True], NDArray[np.uint8]] | tuple[Literal[False], None]
+            Success status and image array with shape (height, width, channels in BGR)
+            if successful, (False, None) otherwise.
         """
         raise NotImplementedError

@@ -4,6 +4,7 @@ Module to convert ground locations list to kml document.
 
 import pathlib
 import time
+from typing import List, Optional, Tuple, Union
 
 import simplekml
 import simplekml.base
@@ -14,9 +15,23 @@ from .. import position_global_relative_altitude
 
 def __save_kml_file(
     kml: simplekml.Kml, document_name_prefix: str, save_directory: pathlib.Path
-) -> tuple[True, pathlib.Path] | tuple[False, None]:
+) -> Union[Tuple[bool, pathlib.Path], Tuple[bool, None]]:
     """
     Save KML to the directory.
+
+    Parameters
+    ----------
+    kml : simplekml.Kml
+        KML document to save.
+    document_name_prefix : str
+        Name prefix for the KML file (without timestamp or .kml extension).
+    save_directory : pathlib.Path
+        Parent directory to save the KML file to.
+
+    Returns
+    -------
+    Tuple[bool, pathlib.Path] or Tuple[bool, None]
+        Success status and path to the KML file if successful, None otherwise.
     """
     current_time = time.time()
     kml_file_path = pathlib.Path(save_directory, f"{document_name_prefix}_{int(current_time)}.kml")
@@ -33,18 +48,26 @@ def __save_kml_file(
 
 
 def named_positions_to_kml(
-    named_positions: list[position_global_relative_altitude.NamedPositionGlobalRelativeAltitude],
+    named_positions: List[position_global_relative_altitude.NamedPositionGlobalRelativeAltitude],
     document_name_prefix: str,
     save_directory: pathlib.Path,
-) -> tuple[True, pathlib.Path] | tuple[False, None]:
+) -> Union[Tuple[bool, pathlib.Path], Tuple[bool, None]]:
     """
     Generates a KML file from a list of ground locations.
 
-    named_positions: Positions with names.
-    document_name_prefix: Name of the KML file to save (without the timestamp or .kml extension).
-    save_directory: Parent directory to save the KML file to.
+    Parameters
+    ----------
+    named_positions : List[position_global_relative_altitude.NamedPositionGlobalRelativeAltitude]
+        Positions with names.
+    document_name_prefix : str
+        Name of the KML file to save (without the timestamp or .kml extension).
+    save_directory : pathlib.Path
+        Parent directory to save the KML file to.
 
-    Return: Success, path to the KML file.
+    Returns
+    -------
+    Tuple[bool, pathlib.Path] or Tuple[bool, None]
+        Success status and path to the KML file if successful, None otherwise.
     """
     if len(named_positions) == 0:
         return False, None
@@ -68,18 +91,26 @@ def named_positions_to_kml(
 
 
 def positions_to_kml(
-    positions: list[position_global_relative_altitude.PositionGlobalRelativeAltitude],
+    positions: List[position_global_relative_altitude.PositionGlobalRelativeAltitude],
     document_name_prefix: str,
     save_directory: pathlib.Path,
-) -> "tuple[bool, pathlib.Path | None]":
+) -> Union[Tuple[bool, pathlib.Path], Tuple[bool, None]]:
     """
     Converts positions to named positions with enumerated name and calls named_positions_to_kml.
 
-    positions: Positions without names.
-    document_name_prefix: Name of the KML file to save (without the timestamp or .kml extension).
-    save_directory: Parent directory to save the KML file to.
+    Parameters
+    ----------
+    positions : List[position_global_relative_altitude.PositionGlobalRelativeAltitude]
+        Positions without names.
+    document_name_prefix : str
+        Name of the KML file to save (without the timestamp or .kml extension).
+    save_directory : pathlib.Path
+        Parent directory to save the KML file to.
 
-    Return: Success, path to the KML file.
+    Returns
+    -------
+    Tuple[bool, pathlib.Path] or Tuple[bool, None]
+        Success status and path to the KML file if successful, None otherwise.
     """
     named_positions = []
     for i, position in enumerate(positions):
@@ -100,18 +131,26 @@ def positions_to_kml(
 
 
 def named_locations_to_kml(
-    named_locations: list[location_global.NamedLocationGlobal],
+    named_locations: List[location_global.NamedLocationGlobal],
     document_name_prefix: str,
     save_directory: pathlib.Path,
-) -> tuple[True, pathlib.Path] | tuple[False, None]:
+) -> Union[Tuple[bool, pathlib.Path], Tuple[bool, None]]:
     """
     Converts named locations to named positions and calls named_positions_to_kml.
 
-    named_locations: Locations with names.
-    document_name_prefix: Name of the KML file to save (without the timestamp or .kml extension).
-    save_directory: Parent directory to save the KML file to.
+    Parameters
+    ----------
+    named_locations : List[location_global.NamedLocationGlobal]
+        Locations with names.
+    document_name_prefix : str
+        Name of the KML file to save (without the timestamp or .kml extension).
+    save_directory : pathlib.Path
+        Parent directory to save the KML file to.
 
-    Return: Success, path to the KML file.
+    Returns
+    -------
+    Tuple[bool, pathlib.Path] or Tuple[bool, None]
+        Success status and path to the KML file if successful, None otherwise.
     """
     named_positions = []
     for named_location in named_locations:
@@ -132,18 +171,26 @@ def named_locations_to_kml(
 
 
 def locations_to_kml(
-    locations: list[location_global.LocationGlobal],
+    locations: List[location_global.LocationGlobal],
     document_name_prefix: str,
     save_directory: pathlib.Path,
-) -> "tuple[bool, pathlib.Path | None]":
+) -> Union[Tuple[bool, pathlib.Path], Tuple[bool, None]]:
     """
     Converts locations to named positions with enumerated name and altitude 0.0 and calls named_positions_to_kml.
 
-    locations: Locations without names.
-    document_name_prefix: Name of the KML file to save (without the timestamp or .kml extension).
-    save_directory: Parent directory to save the KML file to.
+    Parameters
+    ----------
+    locations : List[location_global.LocationGlobal]
+        Locations without names.
+    document_name_prefix : str
+        Name of the KML file to save (without the timestamp or .kml extension).
+    save_directory : pathlib.Path
+        Parent directory to save the KML file to.
 
-    Return: Success, path to the KML file.
+    Returns
+    -------
+    Tuple[bool, pathlib.Path] or Tuple[bool, None]
+        Success status and path to the KML file if successful, None otherwise.
     """
     named_positions = []
     for i, location in enumerate(locations):

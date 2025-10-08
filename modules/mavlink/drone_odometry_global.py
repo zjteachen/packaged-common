@@ -3,6 +3,7 @@ Position, orientation, and flight mode of drone.
 """
 
 import enum
+from typing import Optional, Tuple
 
 from .. import orientation
 from .. import position_global
@@ -31,9 +32,24 @@ class DroneOdometryGlobal:
         drone_position: position_global.PositionGlobal,
         drone_orientation: orientation.Orientation,
         flight_mode: FlightMode,
-    ) -> "tuple[bool, DroneOdometryGlobal] | tuple[False, None]":
+    ) -> Tuple[bool, Optional["DroneOdometryGlobal"]]:
         """
         Position and orientation in one class.
+
+        Parameters
+        ----------
+        drone_position : position_global.PositionGlobal
+            The drone's global position.
+        drone_orientation : orientation.Orientation
+            The drone's orientation.
+        flight_mode : FlightMode
+            The drone's current flight mode.
+
+        Returns
+        -------
+        Tuple[bool, Optional[DroneOdometryGlobal]]
+            A tuple containing success status and DroneOdometryGlobal instance.
+            Returns (False, None) if any parameter is None.
         """
         if drone_position is None:
             return False, None

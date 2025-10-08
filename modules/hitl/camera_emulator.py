@@ -7,8 +7,10 @@ v4l2loopback for Linux to be installed to work
 
 import os
 import time
+from typing import Optional, Tuple
 import pyvirtualcam
 import cv2
+from numpy.typing import NDArray
 
 IMAGE_SIZE = (720, 480)
 IMAGE_FORMATS = (".png", ".jpeg", "jpg")
@@ -25,16 +27,22 @@ class CameraEmulator:
     @classmethod
     def create(
         cls, images_path: str, time_between_images: float = 1.0
-    ) -> "tuple[True, CameraEmulator] | tuple[False, None]":
+    ) -> Tuple[bool, Optional["CameraEmulator"]]:
         """
-        Setup camera emulator.
+        Set up camera emulator.
 
-        Args:
-            images_path: Path to the directory containing images for the camera emulator. Cycles through these images to simulate camera input (every 1 second).
-            time_between_images: Time in seconds between image changes.
+        Parameters
+        ----------
+        images_path : str
+            Path to the directory containing images for the camera emulator.
+            Cycles through these images to simulate camera input.
+        time_between_images : float, optional
+            Time in seconds between image changes, by default 1.0.
 
-        Returns:
-            Success, CameraEmulator instance.
+        Returns
+        -------
+        Tuple[bool, Optional[CameraEmulator]]
+            A tuple containing success status and CameraEmulator instance (or None if failed).
         """
 
         if not isinstance(images_path, str):
@@ -77,17 +85,28 @@ class CameraEmulator:
         class_private_create_key: object,
         images_path: str,
         time_between_images: float,
-        virtual_camera: pyvirtualcam,
+        virtual_camera: pyvirtualcam.Camera,
     ) -> None:
         """
         Private constructor, use create() method.
+
+        Parameters
+        ----------
+        class_private_create_key : object
+            Private key to ensure constructor is only called via create().
+        images_path : str
+            Path to the directory containing images.
+        time_between_images : float
+            Time in seconds between image changes.
+        virtual_camera : pyvirtualcam.Camera
+            The virtual camera instance.
         """
         assert class_private_create_key is CameraEmulator.__create_key, "Use create() method"
 
         self.__image_folder_path = images_path
         self.__virtual_camera = virtual_camera
-        self.__image_paths: "list[str]" = []
-        self.__current_frame = None
+        self.__image_paths: list[str] = []
+        self.__current_frame: Optional[NDArray] = None
         self.__image_index = 0
         self.__next_image_time = time.time() + time_between_images
         self.__time_between_images = time_between_images
@@ -97,7 +116,10 @@ class CameraEmulator:
 
     def periodic(self) -> None:
         """
-        Periodic function.
+        Execute periodic camera emulation tasks.
+
+        Sends frames to the virtual camera and cycles through images
+        at the specified interval.
         """
         try:
             # Send frame and pace to target FPS
@@ -118,8 +140,9 @@ class CameraEmulator:
 
     def send_frame(self) -> None:
         """
-        sends a new frame to virtual camera, should be called in a loop
+        Send a new frame to virtual camera.
 
+        This method should be called in a loop to maintain the video stream.
         """
         try:
             self.__virtual_camera.send(self.__current_frame)
@@ -131,14 +154,18 @@ class CameraEmulator:
 
     def sleep_until_next_frame(self) -> None:
         """
-        Waits an amount of time to maintain targeted framerate
-        (Wrapper for pyvirtualcam)
+        Wait an amount of time to maintain targeted framerate.
+
+        This is a wrapper for pyvirtualcam's sleep_until_next_frame method.
         """
         self.__virtual_camera.sleep_until_next_frame()
 
     def update_current_image(self) -> None:
         """
-        sets curr_img to the image specified by the curr_img_index
+        Set current image to the image specified by the current image index.
+
+        Reads the image from disk, converts it to RGB format, and updates
+        the current frame. Skips images that fail to load.
         """
 
         has_image = False
@@ -161,14 +188,19 @@ class CameraEmulator:
 
     def next_image(self) -> None:
         """
-        increments image index by 1
+        Increment image index by 1.
+
+        Wraps around to the beginning when reaching the end of the image list.
         """
 
         self.__image_index = (self.__image_index + 1) % len(self.__image_paths)
 
     def __get_images(self) -> None:
         """
-        populates _images array with paths of all images in the folder
+        Populate the images array with paths of all images in the folder.
+
+        Scans the image folder for files with valid image formats and stores
+        their paths in the internal image paths list.
         """
         try:
             for image in os.listdir(self.__image_folder_path):
