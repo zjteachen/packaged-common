@@ -8,3 +8,9 @@ venv/
 
 # Logging
 logs/
+
+# Package builds
+build/
+dist/
+warg_common.egg-info/
+warg_common/
